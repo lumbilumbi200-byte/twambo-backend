@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Twambo — Kitwe's Community Commute</title>
+  <title>Twambo — Zambia's Community Commute</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -266,6 +266,16 @@
     .apk-meta-row { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
     .apk-meta-row svg { width: 16px; height: 16px; stroke: var(--yellow); fill: none; stroke-width: 2; flex-shrink: 0; }
 
+    /* ── QR ── */
+    .qr-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .qr-img {
+      width: 140px; height: 140px; border-radius: 8px;
+      border: 3px solid var(--yellow); padding: 6px; background: var(--yellow);
+    }
+    .qr-label { font-size: 11px; color: var(--muted); letter-spacing: 1.5px; font-weight: 700; }
+
     /* ── ECO BANNER ── */
     .eco-banner {
       background: rgba(76,175,80,0.06);
@@ -338,14 +348,14 @@
   <section style="background: radial-gradient(ellipse 60% 50% at 70% 50%, rgba(245,197,24,0.05) 0%, transparent 70%);">
     <div class="hero">
       <div class="hero-left">
-        <div class="hero-tag">KITWE · ZAMBIA</div>
+        <div class="hero-tag">ZAMBIA</div>
         <h1>Your Daily<br/>Commute,<br/><span class="accent">Shared.</span></h1>
         <p class="hero-sub">
-          Same road. Same time. Split the cost. Twambo connects Kitwe's everyday commuters with drivers already making the trip.
+          Same road. Same time. Split the cost. Twambo connects everyday commuters with drivers already making the trip.
         </p>
         <p class="hero-people">
-          <strong>Teachers heading to Nkana. Nurses going to Kitwe Central.<br/>
-          Workers crossing town every morning.</strong><br/>
+          <strong>Teachers. Nurses. Civil servants. Students.<br/>
+          Workers making the same trip every morning.</strong><br/>
           Twambo was built for you.
         </p>
         <div class="hero-actions">
@@ -381,7 +391,7 @@
               <div class="screen-card">
                 <div class="screen-card-row">
                   <div>
-                    <div class="screen-label">KITWE → NDOLA</div>
+                    <div class="screen-label">TOWN → HOSPITAL</div>
                     <div class="screen-value">07:30 AM · 3 seats left</div>
                   </div>
                   <div class="screen-price">K35</div>
@@ -408,7 +418,7 @@
   <section id="who" class="who-section">
     <div class="who-inner">
       <div class="section-tag">WHO IT'S FOR</div>
-      <h2 class="section-title">Built for the people of Kitwe.</h2>
+      <h2 class="section-title">Built for everyday commuters.</h2>
       <div class="who-grid">
 
         <div class="who-card rider">
@@ -440,7 +450,7 @@
           <div class="who-label">THE CITY</div>
           <div class="who-title">Fewer Cars. Cleaner Roads.</div>
           <div class="who-desc">
-            Every shared ride means one fewer car on Kitwe's roads. <strong>Less congestion, lower emissions, a cleaner commute for everyone.</strong> Twambo isn't just smart — it's the right way to move.
+            Every shared ride means one fewer car on the road. <strong>Less congestion, lower emissions, a cleaner commute for everyone.</strong> Twambo isn't just smart — it's the right way to move.
           </div>
         </div>
 
@@ -489,7 +499,7 @@
   <!-- ECO BANNER -->
   <div class="eco-banner">
     <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 19.82L5.71 21l1-1.9A4.501 4.501 0 007 19c4 0 9-4 9-9 0 0 2 4-2 7 3.37-1.12 5.59-3.69 6.5-6.5C21.41 8.24 21 6 17 8z"/></svg>
-    <p>Every shared ride is <strong>one less car on the road.</strong> Twambo is Kitwe commuting smarter.</p>
+    <p>Every shared ride is <strong>one less car on the road.</strong> Smarter commuting for everyone.</p>
   </div>
 
   <!-- INSTALL -->
@@ -538,6 +548,11 @@
           DOWNLOAD FOR ANDROID
         </a>
         <p style="font-size:12px;color:#444;">Free · No subscription · No hidden fees</p>
+
+        <div class="qr-wrap">
+          <img class="qr-img" src="data:image/png;base64,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" alt="Scan to download Twambo"/>
+          <div class="qr-label">SCAN TO DOWNLOAD</div>
+        </div>
       </div>
     </div>
   </section>
@@ -551,7 +566,7 @@
         <span>ECO</span>
       </div>
     </div>
-    <div>&copy; 2026 Twambo &nbsp;·&nbsp; Kitwe, Zambia</div>
+    <div>&copy; 2026 Twambo &nbsp;·&nbsp; Zambia</div>
     <div><a href="/dashboard/" style="color:#555;text-decoration:none;">Admin</a></div>
   </footer>
 
