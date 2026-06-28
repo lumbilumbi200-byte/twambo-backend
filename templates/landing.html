@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Twambo — Ride Sharing for Zambia</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800;900&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <title>Twambo — Kitwe's Community Commute</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
       --yellow: #F5C518;
+      --green:  #4CAF50;
       --black:  #0D0D0D;
       --dark:   #141414;
       --card:   #1A1A1A;
@@ -19,461 +20,296 @@
     }
 
     html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--black);
-      color: var(--text);
-      font-family: 'Manrope', sans-serif;
-      overflow-x: hidden;
-    }
+    body { background: var(--black); color: var(--text); font-family: 'Manrope', sans-serif; overflow-x: hidden; }
 
     /* ── NAV ── */
     nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 48px;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 48px;
       background: rgba(13,13,13,0.92);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--line);
     }
 
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+    }
+
     .nav-logo {
       font-family: 'Space Grotesk', sans-serif;
-      font-weight: 900;
-      font-size: 20px;
-      letter-spacing: 4px;
-      color: var(--yellow);
+      font-weight: 900; font-size: 20px; letter-spacing: 4px; color: var(--yellow);
     }
 
-    .nav-links {
-      display: flex;
-      gap: 32px;
-      list-style: none;
+    .eco-leaf {
+      display: flex; align-items: center; gap: 4px;
+      background: rgba(76,175,80,0.12);
+      border: 1px solid rgba(76,175,80,0.25);
+      border-radius: 20px;
+      padding: 3px 8px;
     }
 
-    .nav-links a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      transition: color 0.2s;
-    }
+    .eco-leaf svg { width: 12px; height: 12px; fill: var(--green); }
+    .eco-leaf span { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--green); }
 
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600; transition: color 0.2s; }
     .nav-links a:hover { color: var(--text); }
 
     .nav-cta {
-      background: var(--yellow);
-      color: var(--black);
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 800;
-      font-size: 12px;
-      letter-spacing: 1.5px;
-      padding: 10px 24px;
-      text-decoration: none;
-      transition: opacity 0.2s;
+      background: var(--yellow); color: var(--black);
+      font-family: 'Space Grotesk', sans-serif; font-weight: 800;
+      font-size: 12px; letter-spacing: 1.5px; padding: 10px 24px;
+      text-decoration: none; transition: opacity 0.2s;
     }
-
     .nav-cta:hover { opacity: 0.85; }
 
     /* ── HERO ── */
     .hero {
       min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
-      padding: 120px 48px 80px;
-      gap: 48px;
-      max-width: 1200px;
-      margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center; padding: 120px 48px 80px;
+      gap: 48px; max-width: 1200px; margin: 0 auto;
     }
 
     .hero-left { display: flex; flex-direction: column; }
 
     .hero-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(245,197,24,0.12);
-      border: 1px solid rgba(245,197,24,0.3);
-      color: var(--yellow);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      padding: 6px 14px;
-      width: fit-content;
-      margin-bottom: 28px;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(245,197,24,0.12); border: 1px solid rgba(245,197,24,0.3);
+      color: var(--yellow); font-size: 11px; font-weight: 800; letter-spacing: 2px;
+      padding: 6px 14px; width: fit-content; margin-bottom: 28px;
     }
 
-    .hero-tag::before {
-      content: '';
-      width: 6px; height: 6px;
-      background: var(--yellow);
-      border-radius: 50%;
-    }
+    .hero-tag::before { content: ''; width: 6px; height: 6px; background: var(--yellow); border-radius: 50%; }
 
     h1 {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(42px, 5vw, 68px);
-      font-weight: 900;
-      line-height: 1.02;
-      letter-spacing: -2px;
-      margin-bottom: 24px;
+      font-size: clamp(38px, 5vw, 64px); font-weight: 900;
+      line-height: 1.02; letter-spacing: -2px; margin-bottom: 20px;
     }
 
     h1 .accent { color: var(--yellow); }
 
-    .hero-desc {
-      font-size: 16px;
-      color: var(--muted);
-      line-height: 1.7;
-      max-width: 440px;
-      margin-bottom: 40px;
+    .hero-sub {
+      font-size: 15px; color: var(--muted); line-height: 1.7;
+      max-width: 460px; margin-bottom: 16px;
     }
+
+    .hero-people {
+      font-size: 13px; color: #555; margin-bottom: 36px; line-height: 1.6;
+      border-left: 3px solid var(--yellow); padding-left: 14px;
+    }
+
+    .hero-people strong { color: #888; }
 
     .hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
 
     .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--yellow);
-      color: var(--black);
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 800;
-      font-size: 13px;
-      letter-spacing: 1px;
-      padding: 16px 32px;
-      text-decoration: none;
-      transition: opacity 0.2s;
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--yellow); color: var(--black);
+      font-family: 'Space Grotesk', sans-serif; font-weight: 800;
+      font-size: 13px; letter-spacing: 1px; padding: 16px 32px;
+      text-decoration: none; transition: opacity 0.2s;
     }
-
     .btn-primary:hover { opacity: 0.88; }
 
     .btn-secondary {
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 600;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: color 0.2s;
+      color: var(--muted); font-size: 14px; font-weight: 600;
+      text-decoration: none; display: flex; align-items: center; gap: 8px; transition: color 0.2s;
     }
-
     .btn-secondary:hover { color: var(--text); }
 
-    .hero-note {
-      margin-top: 20px;
-      font-size: 12px;
-      color: #444;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .hero-note { margin-top: 20px; font-size: 12px; color: #444; display: flex; align-items: center; gap: 6px; }
 
     /* ── PHONE MOCKUP ── */
-    .hero-right {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    }
+    .hero-right { display: flex; justify-content: center; align-items: center; position: relative; }
 
-    .mockup-wrap {
-      position: relative;
-      width: 260px;
-    }
+    .mockup-wrap { position: relative; width: 260px; }
 
     .phone {
-      width: 260px;
-      height: 520px;
-      background: var(--card);
-      border-radius: 36px;
-      border: 2px solid #2a2a2a;
-      overflow: hidden;
-      position: relative;
+      width: 260px; height: 520px;
+      background: var(--card); border-radius: 36px;
+      border: 2px solid #2a2a2a; overflow: hidden; position: relative;
       box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px #333;
     }
 
     .phone-notch {
-      position: absolute;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80px; height: 24px;
-      background: var(--black);
-      border-radius: 12px;
-      z-index: 10;
+      position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+      width: 80px; height: 24px; background: var(--black); border-radius: 12px; z-index: 10;
     }
 
     .phone-screen {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       background: linear-gradient(160deg, #141414 0%, #1a1a1a 100%);
-      padding: 60px 16px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      padding: 60px 16px 16px; display: flex; flex-direction: column; gap: 10px;
     }
 
-    .screen-bar {
-      background: var(--yellow);
-      border-radius: 4px;
-      height: 8px;
-      width: 100%;
-    }
-
+    .screen-bar { background: var(--yellow); border-radius: 4px; height: 8px; width: 100%; }
     .screen-bar.short { width: 60%; opacity: 0.5; }
 
-    .screen-map {
-      flex: 1;
-      background: #222;
-      border-radius: 8px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .map-pin {
-      position: absolute;
-      top: 30%;
-      left: 50%;
-      transform: translateX(-50%);
-    }
+    .screen-map { flex: 1; background: #222; border-radius: 8px; position: relative; overflow: hidden; }
 
     .map-grid {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(245,197,24,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(245,197,24,0.06) 1px, transparent 1px);
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(245,197,24,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(245,197,24,0.06) 1px, transparent 1px);
       background-size: 24px 24px;
     }
 
     .map-route {
-      position: absolute;
-      top: 30%; left: 20%;
-      width: 60%; height: 40%;
-      border: 2px dashed rgba(245,197,24,0.4);
-      border-radius: 0 20px 0 20px;
+      position: absolute; top: 30%; left: 20%; width: 60%; height: 40%;
+      border: 2px dashed rgba(245,197,24,0.4); border-radius: 0 20px 0 20px;
     }
 
-    .screen-card {
-      background: #252525;
-      border-radius: 8px;
-      padding: 12px;
-    }
+    .map-pin { position: absolute; top: 28%; left: 50%; transform: translateX(-50%); }
 
-    .screen-card-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
+    .screen-card { background: #252525; border-radius: 8px; padding: 12px; }
+    .screen-card-row { display: flex; justify-content: space-between; align-items: center; }
     .screen-label { font-size: 9px; color: #666; font-family: 'Space Grotesk', sans-serif; letter-spacing: 1px; }
     .screen-value { font-size: 13px; font-weight: 700; color: #fff; font-family: 'Space Grotesk', sans-serif; }
     .screen-price { font-size: 16px; font-weight: 900; color: var(--yellow); font-family: 'Space Grotesk', sans-serif; }
+    .screen-btn { margin-top: 8px; background: var(--yellow); color: var(--black); font-size: 9px; font-weight: 800; letter-spacing: 1.5px; font-family: 'Space Grotesk', sans-serif; text-align: center; padding: 7px; border-radius: 4px; }
 
-    .screen-btn {
-      margin-top: 8px;
-      background: var(--yellow);
-      color: var(--black);
-      font-size: 9px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      font-family: 'Space Grotesk', sans-serif;
-      text-align: center;
-      padding: 7px;
-      border-radius: 4px;
-    }
-
-    /* floating badges */
     .badge-float {
-      position: absolute;
-      background: var(--card);
-      border: 1px solid var(--line);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      position: absolute; background: var(--card); border: 1px solid var(--line);
+      padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
     }
-
     .badge-float span { color: var(--yellow); }
     .badge-left  { left: -80px; top: 30%; }
     .badge-right { right: -70px; bottom: 28%; }
+    .phone-bar { position: absolute; right: -30px; top: 60px; bottom: 60px; width: 6px; background: var(--yellow); border-radius: 3px; }
 
-    /* yellow bar behind phone */
-    .phone-bar {
-      position: absolute;
-      right: -30px; top: 60px; bottom: 60px;
-      width: 6px;
-      background: var(--yellow);
-      border-radius: 3px;
-    }
-
-    /* ── FEATURES ── */
-    .section {
-      max-width: 1200px;
-      margin: 0 auto;
+    /* ── WHO IT'S FOR ── */
+    .who-section {
+      background: var(--dark);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
       padding: 80px 48px;
     }
 
-    .section-tag {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 3px;
-      color: var(--yellow);
-      margin-bottom: 16px;
-    }
+    .who-inner { max-width: 1200px; margin: 0 auto; }
+
+    .section-tag { font-size: 11px; font-weight: 800; letter-spacing: 3px; color: var(--yellow); margin-bottom: 12px; }
 
     .section-title {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(28px, 4vw, 42px);
-      font-weight: 800;
-      margin-bottom: 48px;
-      max-width: 480px;
-      line-height: 1.1;
+      font-size: clamp(26px, 3.5vw, 40px); font-weight: 800;
+      margin-bottom: 48px; line-height: 1.1;
     }
 
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 2px;
+    .who-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+
+    .who-card {
+      background: var(--card); padding: 36px 28px;
+      border-top: 3px solid transparent; transition: border-color 0.2s;
     }
 
-    .feature-card {
-      background: var(--card);
-      padding: 32px 28px;
-      border-top: 3px solid var(--yellow);
-      transition: background 0.2s;
-    }
+    .who-card.rider  { border-color: var(--yellow); }
+    .who-card.driver { border-color: #F59318; }
+    .who-card.city   { border-color: var(--green); }
 
-    .feature-card:hover { background: #202020; }
-
-    .feature-icon {
-      width: 44px; height: 44px;
-      background: rgba(245,197,24,0.1);
-      display: flex; align-items: center; justify-content: center;
+    .who-icon {
+      width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
       margin-bottom: 20px;
     }
 
-    .feature-icon svg { width: 22px; height: 22px; stroke: var(--yellow); fill: none; stroke-width: 2; }
+    .who-icon svg { width: 28px; height: 28px; stroke-width: 1.8; fill: none; }
+    .who-card.rider  .who-icon svg { stroke: var(--yellow); }
+    .who-card.driver .who-icon svg { stroke: #F59318; }
+    .who-card.city   .who-icon svg { stroke: var(--green); }
 
-    .feature-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 8px;
+    .who-label {
+      font-size: 10px; font-weight: 800; letter-spacing: 2px; margin-bottom: 8px;
     }
 
-    .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .who-card.rider  .who-label { color: var(--yellow); }
+    .who-card.driver .who-label { color: #F59318; }
+    .who-card.city   .who-label { color: var(--green); }
+
+    .who-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+    .who-desc  { font-size: 14px; color: var(--muted); line-height: 1.7; }
+    .who-desc strong { color: #bbb; }
+
+    /* ── FEATURES ── */
+    .section { max-width: 1200px; margin: 0 auto; padding: 80px 48px; }
+
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2px; }
+
+    .feature-card { background: var(--card); padding: 32px 28px; border-top: 3px solid var(--yellow); transition: background 0.2s; }
+    .feature-card:hover { background: #202020; }
+
+    .feature-icon { width: 44px; height: 44px; background: rgba(245,197,24,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+    .feature-icon svg { width: 22px; height: 22px; stroke: var(--yellow); fill: none; stroke-width: 2; }
+
+    .feature-title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .feature-desc  { font-size: 13px; color: var(--muted); line-height: 1.6; }
 
     /* ── INSTALL ── */
     .install-section {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 48px 80px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: center;
+      max-width: 1200px; margin: 0 auto; padding: 0 48px 80px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
     }
 
     .install-steps { display: flex; flex-direction: column; gap: 0; }
 
-    .install-step {
-      display: flex;
-      gap: 20px;
-      padding: 24px 0;
-      border-bottom: 1px solid var(--line);
-    }
-
+    .install-step { display: flex; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--line); }
     .install-step:first-child { border-top: 1px solid var(--line); }
 
-    .step-num {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 32px;
-      font-weight: 900;
-      color: rgba(245,197,24,0.2);
-      line-height: 1;
-      flex-shrink: 0;
-      width: 48px;
-    }
-
-    .step-content h3 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .step-content p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .step-num { font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 900; color: rgba(245,197,24,0.2); line-height: 1; flex-shrink: 0; width: 48px; }
+    .step-content h3 { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .step-content p  { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
     .install-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 24px; }
 
-    .apk-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .apk-meta-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
+    .apk-meta { display: flex; flex-direction: column; gap: 8px; }
+    .apk-meta-row { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
     .apk-meta-row svg { width: 16px; height: 16px; stroke: var(--yellow); fill: none; stroke-width: 2; flex-shrink: 0; }
+
+    /* ── ECO BANNER ── */
+    .eco-banner {
+      background: rgba(76,175,80,0.06);
+      border-top: 1px solid rgba(76,175,80,0.15);
+      border-bottom: 1px solid rgba(76,175,80,0.15);
+      padding: 20px 48px;
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+    }
+
+    .eco-banner svg { width: 18px; height: 18px; fill: var(--green); flex-shrink: 0; }
+    .eco-banner p { font-size: 13px; color: #5a8f5c; font-weight: 600; letter-spacing: 0.3px; }
+    .eco-banner strong { color: var(--green); }
 
     /* ── FOOTER ── */
     footer {
-      border-top: 1px solid var(--line);
-      padding: 24px 48px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      color: #444;
+      border-top: 1px solid var(--line); padding: 24px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: #444;
     }
 
-    .footer-logo {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 900;
-      letter-spacing: 3px;
-      color: var(--yellow);
-      font-size: 14px;
-    }
+    .footer-brand { display: flex; align-items: center; gap: 10px; }
+    .footer-logo { font-family: 'Space Grotesk', sans-serif; font-weight: 900; letter-spacing: 3px; color: var(--yellow); font-size: 14px; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
       nav { padding: 16px 24px; }
       .nav-links { display: none; }
 
-      .hero {
-        grid-template-columns: 1fr;
-        padding: 100px 24px 60px;
-        text-align: center;
-      }
-
+      .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; text-align: center; }
       .hero-left { align-items: center; }
-      .hero-desc { text-align: center; }
+      .hero-sub, .hero-people { text-align: center; }
       .hero-note { justify-content: center; }
-
       .hero-right { order: -1; }
       .badge-left, .badge-right { display: none; }
       .mockup-wrap { width: 200px; }
       .phone { width: 200px; height: 400px; }
 
+      .who-section { padding: 60px 24px; }
+      .who-grid { grid-template-columns: 1fr; gap: 2px; }
+
       .section { padding: 60px 24px; }
       .install-section { grid-template-columns: 1fr; padding: 0 24px 60px; gap: 40px; }
-      footer { flex-direction: column; gap: 8px; text-align: center; }
+      .eco-banner { padding: 20px 24px; text-align: center; flex-direction: column; gap: 8px; }
+      footer { flex-direction: column; gap: 8px; text-align: center; padding: 24px; }
     }
   </style>
 </head>
@@ -481,8 +317,15 @@
 
   <!-- NAV -->
   <nav>
-    <div class="nav-logo">TWMB</div>
+    <div class="nav-brand">
+      <div class="nav-logo">TWMB</div>
+      <div class="eco-leaf">
+        <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 19.82L5.71 21l1-1.9A4.501 4.501 0 007 19c4 0 9-4 9-9 0 0 2 4-2 7 3.37-1.12 5.59-3.69 6.5-6.5C21.41 8.24 21 6 17 8z"/></svg>
+        <span>ECO</span>
+      </div>
+    </div>
     <ul class="nav-links">
+      <li><a href="#who">Who It's For</a></li>
       <li><a href="#features">Features</a></li>
       <li><a href="#install">Install</a></li>
     </ul>
@@ -492,33 +335,32 @@
   </nav>
 
   <!-- HERO -->
-  <section style="background: radial-gradient(ellipse 60% 50% at 70% 50%, rgba(245,197,24,0.06) 0%, transparent 70%);">
+  <section style="background: radial-gradient(ellipse 60% 50% at 70% 50%, rgba(245,197,24,0.05) 0%, transparent 70%);">
     <div class="hero">
       <div class="hero-left">
-        <div class="hero-tag">AVAILABLE NOW · ZAMBIA</div>
-        <h1>Share The<br/>Ride, Split<br/>The <span class="accent">Fare.</span></h1>
-        <p class="hero-desc">
-          Book a seat on scheduled rides across Kitwe. Multiple riders share one car — and split the cost automatically.
+        <div class="hero-tag">KITWE · ZAMBIA</div>
+        <h1>Your Daily<br/>Commute,<br/><span class="accent">Shared.</span></h1>
+        <p class="hero-sub">
+          Same road. Same time. Split the cost. Twambo connects Kitwe's everyday commuters with drivers already making the trip.
+        </p>
+        <p class="hero-people">
+          <strong>Teachers heading to Nkana. Nurses going to Kitwe Central.<br/>
+          Workers crossing town every morning.</strong><br/>
+          Twambo was built for you.
         </p>
         <div class="hero-actions">
           <a class="btn-primary" href="https://github.com/lumbilumbi200-byte/twambo/releases/download/v1.0.0/app-release.apk" download>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/></svg>
             DOWNLOAD FOR ANDROID
           </a>
-          <a class="btn-secondary" href="#install">
-            How to install
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
+          <a class="btn-secondary" href="#who">
+            Who it's for
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
         </div>
         <p class="hero-note">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2">
-            <rect x="5" y="2" width="14" height="20" rx="2"/>
-          </svg>
-          Android 6.0 or higher &nbsp;·&nbsp; 55 MB
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg>
+          Android 6.0 or higher &nbsp;·&nbsp; Free to download
         </p>
       </div>
 
@@ -533,16 +375,14 @@
                 <div class="map-grid"></div>
                 <div class="map-route"></div>
                 <div class="map-pin">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="#F5C518">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                  </svg>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="#F5C518"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                 </div>
               </div>
               <div class="screen-card">
                 <div class="screen-card-row">
                   <div>
                     <div class="screen-label">KITWE → NDOLA</div>
-                    <div class="screen-value">07:30 AM · 3 seats</div>
+                    <div class="screen-value">07:30 AM · 3 seats left</div>
                   </div>
                   <div class="screen-price">K35</div>
                 </div>
@@ -556,7 +396,7 @@
             <span>K35 / seat</span>
           </div>
           <div class="badge-float badge-right">
-            <div style="color:#888;font-size:10px;margin-bottom:2px">RIDERS</div>
+            <div style="color:#888;font-size:10px;margin-bottom:2px">RIDERS TODAY</div>
             <span>4 booked</span>
           </div>
         </div>
@@ -564,10 +404,54 @@
     </div>
   </section>
 
+  <!-- WHO IT'S FOR -->
+  <section id="who" class="who-section">
+    <div class="who-inner">
+      <div class="section-tag">WHO IT'S FOR</div>
+      <h2 class="section-title">Built for the people of Kitwe.</h2>
+      <div class="who-grid">
+
+        <div class="who-card rider">
+          <div class="who-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="who-label">THE RIDER</div>
+          <div class="who-title">The Daily Commuter</div>
+          <div class="who-desc">
+            Teachers, nurses, office workers, students — anyone who makes the same trip every day. <strong>Book a seat, split the cost, arrive on time.</strong> No need to own a car or wait for a minibus.
+          </div>
+        </div>
+
+        <div class="who-card driver">
+          <div class="who-icon">
+            <svg viewBox="0 0 24 24"><path d="M14 16H9m10 0h3v-3.15a1 1 0 00-.84-.99L16 11l-2.7-6.09A1 1 0 0012.37 4H5.63a1 1 0 00-.93.63L2 11l-1.16.86A1 1 0 00.5 12.85V16H3"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+          </div>
+          <div class="who-label">THE DRIVER</div>
+          <div class="who-title">Passive Income On Your Way</div>
+          <div class="who-desc">
+            You're already driving to work. Post your trip, pick up riders along the way, and let the fare offset your fuel costs. <strong>No full-time commitment. Just your normal route, paying for itself.</strong>
+          </div>
+        </div>
+
+        <div class="who-card city">
+          <div class="who-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 19.82L5.71 21l1-1.9A4.501 4.501 0 007 19c4 0 9-4 9-9 0 0 2 4-2 7 3.37-1.12 5.59-3.69 6.5-6.5C21.41 8.24 21 6 17 8z"/></svg>
+          </div>
+          <div class="who-label">THE CITY</div>
+          <div class="who-title">Fewer Cars. Cleaner Roads.</div>
+          <div class="who-desc">
+            Every shared ride means one fewer car on Kitwe's roads. <strong>Less congestion, lower emissions, a cleaner commute for everyone.</strong> Twambo isn't just smart — it's the right way to move.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- FEATURES -->
   <section id="features">
     <div class="section">
-      <div class="section-tag">WHY TWAMBO</div>
+      <div class="section-tag">BUILT RIGHT</div>
       <h2 class="section-title">Everything you need in one ride.</h2>
       <div class="features-grid">
         <div class="feature-card">
@@ -589,18 +473,24 @@
             <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
           </div>
           <div class="feature-title">Live Tracking</div>
-          <div class="feature-desc">Watch your driver move in real time on the map.</div>
+          <div class="feature-desc">Watch your driver move in real time on the map. Know exactly when they arrive.</div>
         </div>
         <div class="feature-card">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           </div>
-          <div class="feature-title">Shared Fares</div>
-          <div class="feature-desc">More riders means a lower cost per seat. Always fair, always split.</div>
+          <div class="feature-title">Fair Shared Fares</div>
+          <div class="feature-desc">More riders means a lower cost per seat. Always split automatically.</div>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- ECO BANNER -->
+  <div class="eco-banner">
+    <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 19.82L5.71 21l1-1.9A4.501 4.501 0 007 19c4 0 9-4 9-9 0 0 2 4-2 7 3.37-1.12 5.59-3.69 6.5-6.5C21.41 8.24 21 6 17 8z"/></svg>
+    <p>Every shared ride is <strong>one less car on the road.</strong> Twambo is Kitwe commuting smarter.</p>
+  </div>
 
   <!-- INSTALL -->
   <section id="install">
@@ -611,31 +501,19 @@
         <div class="install-steps">
           <div class="install-step">
             <div class="step-num">01</div>
-            <div class="step-content">
-              <h3>Download the APK</h3>
-              <p>Tap the download button and save the file to your phone.</p>
-            </div>
+            <div class="step-content"><h3>Download the APK</h3><p>Tap the download button and save the file to your Android phone.</p></div>
           </div>
           <div class="install-step">
             <div class="step-num">02</div>
-            <div class="step-content">
-              <h3>Allow Unknown Sources</h3>
-              <p>Go to Settings → Security → enable "Install from unknown sources".</p>
-            </div>
+            <div class="step-content"><h3>Allow Unknown Sources</h3><p>Go to Settings → Security → enable "Install from unknown sources".</p></div>
           </div>
           <div class="install-step">
             <div class="step-num">03</div>
-            <div class="step-content">
-              <h3>Open &amp; Install</h3>
-              <p>Open the downloaded file and tap Install. Done.</p>
-            </div>
+            <div class="step-content"><h3>Open &amp; Install</h3><p>Open the downloaded file and tap Install.</p></div>
           </div>
           <div class="install-step">
             <div class="step-num">04</div>
-            <div class="step-content">
-              <h3>Create Your Account</h3>
-              <p>Sign up as a rider or driver and start your first trip.</p>
-            </div>
+            <div class="step-content"><h3>Create Your Account</h3><p>Sign up as a rider or driver and start your first shared trip.</p></div>
           </div>
         </div>
       </div>
@@ -648,27 +526,31 @@
           </div>
           <div class="apk-meta-row">
             <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            55 MB download
+            55 MB · Free download
           </div>
           <div class="apk-meta-row">
             <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            Version 1.0.0
+            Version 1.0.0 · Signed release build
           </div>
         </div>
         <a class="btn-primary" href="https://github.com/lumbilumbi200-byte/twambo/releases/download/v1.0.0/app-release.apk" download>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/>
-          </svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/></svg>
           DOWNLOAD FOR ANDROID
         </a>
-        <p style="font-size:12px;color:#444;">Free · No account required to download</p>
+        <p style="font-size:12px;color:#444;">Free · No subscription · No hidden fees</p>
       </div>
     </div>
   </section>
 
   <!-- FOOTER -->
   <footer>
-    <div class="footer-logo">TWMB</div>
+    <div class="footer-brand">
+      <div class="footer-logo">TWMB</div>
+      <div class="eco-leaf">
+        <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 19.82L5.71 21l1-1.9A4.501 4.501 0 007 19c4 0 9-4 9-9 0 0 2 4-2 7 3.37-1.12 5.59-3.69 6.5-6.5C21.41 8.24 21 6 17 8z"/></svg>
+        <span>ECO</span>
+      </div>
+    </div>
     <div>&copy; 2026 Twambo &nbsp;·&nbsp; Kitwe, Zambia</div>
     <div><a href="/dashboard/" style="color:#555;text-decoration:none;">Admin</a></div>
   </footer>
