@@ -143,3 +143,19 @@ def update_fcm_token(request):
     request.user.fcm_token = serializer.validated_data['fcm_token']
     request.user.save(update_fields=['fcm_token'])
     return Response({'detail': 'FCM token updated'})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def verify_phone(request):
+    id_token = request.data.get('id_token')
+    if not id_token:
+        return Response({'detail': 'id_token required'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        import firebase_admin.auth as fb_auth
+        fb_auth.verify_id_token(id_token)
+        request.user.is_verified = True
+        request.user.save(update_fields=['is_verified', 'updated_at'])
+        return Response({'verified': True})
+    except Exception as e:
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

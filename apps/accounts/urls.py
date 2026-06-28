@@ -8,6 +8,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('me/', views.MeView.as_view(), name='me'),
     path('fcm-token/', views.update_fcm_token, name='fcm_token'),
+    path('verify-phone/', views.verify_phone, name='verify_phone'),
 
     # Driver
     path('driver/profile/', views.DriverProfileView.as_view(), name='driver_profile'),
