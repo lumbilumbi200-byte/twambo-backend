@@ -1,229 +1,676 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Twambo — Ride Sharing for Zambia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800;900&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --yellow: #F5C518;
+      --black:  #0D0D0D;
+      --dark:   #141414;
+      --card:   #1A1A1A;
+      --text:   #FFFFFF;
+      --muted:  #888888;
+      --line:   #2A2A2A;
+    }
+
+    html { scroll-behavior: smooth; }
 
     body {
-      background: #0d0d0d;
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      min-height: 100vh;
+      background: var(--black);
+      color: var(--text);
+      font-family: 'Manrope', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
       display: flex;
-      flex-direction: column;
       align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(13,13,13,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
     }
 
-    header {
-      width: 100%;
-      padding: 20px 32px;
-      border-bottom: 3px solid #f5c518;
-    }
-
-    .logo {
-      font-size: 22px;
+    .nav-logo {
+      font-family: 'Space Grotesk', sans-serif;
       font-weight: 900;
+      font-size: 20px;
       letter-spacing: 4px;
-      color: #f5c518;
+      color: var(--yellow);
     }
 
-    .hero {
-      flex: 1;
+    .nav-links {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 60px 24px 40px;
-      max-width: 600px;
+      gap: 32px;
+      list-style: none;
     }
 
-    .badge {
-      background: #f5c518;
-      color: #0d0d0d;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      padding: 4px 12px;
-      margin-bottom: 24px;
-      display: inline-block;
-    }
-
-    h1 {
-      font-size: clamp(36px, 8vw, 64px);
-      font-weight: 900;
-      line-height: 1.05;
-      letter-spacing: -1px;
-      margin-bottom: 16px;
-    }
-
-    h1 span { color: #f5c518; }
-
-    p.sub {
-      font-size: 16px;
-      color: #aaa;
-      line-height: 1.6;
-      margin-bottom: 40px;
-    }
-
-    .download-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: #f5c518;
-      color: #0d0d0d;
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
       font-size: 14px;
-      font-weight: 900;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--yellow);
+      color: var(--black);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
+      font-size: 12px;
       letter-spacing: 1.5px;
-      padding: 16px 36px;
+      padding: 10px 24px;
       text-decoration: none;
       transition: opacity 0.2s;
     }
 
-    .download-btn:hover { opacity: 0.85; }
+    .nav-cta:hover { opacity: 0.85; }
 
-    .download-btn svg { width: 22px; height: 22px; }
-
-    .note {
-      margin-top: 16px;
-      font-size: 12px;
-      color: #666;
-    }
-
-    .features {
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-      width: 100%;
-      max-width: 600px;
-      padding: 0 24px 60px;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 120px 48px 80px;
+      gap: 48px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .feature {
-      background: #1a1a1a;
-      padding: 20px 16px;
-      border-left: 3px solid #f5c518;
-    }
+    .hero-left { display: flex; flex-direction: column; }
 
-    .feature-icon { font-size: 24px; margin-bottom: 8px; }
-    .feature-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-    .feature-desc { font-size: 12px; color: #888; line-height: 1.4; }
-
-    .install-steps {
-      width: 100%;
-      max-width: 600px;
-      padding: 0 24px 60px;
-    }
-
-    .install-steps h2 {
-      font-size: 16px;
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245,197,24,0.12);
+      border: 1px solid rgba(245,197,24,0.3);
+      color: var(--yellow);
+      font-size: 11px;
       font-weight: 800;
       letter-spacing: 2px;
-      color: #f5c518;
-      margin-bottom: 16px;
+      padding: 6px 14px;
+      width: fit-content;
+      margin-bottom: 28px;
     }
 
-    .step {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 16px;
-      align-items: flex-start;
+    .hero-tag::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--yellow);
+      border-radius: 50%;
     }
 
-    .step-num {
-      background: #f5c518;
-      color: #0d0d0d;
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(42px, 5vw, 68px);
       font-weight: 900;
+      line-height: 1.02;
+      letter-spacing: -2px;
+      margin-bottom: 24px;
+    }
+
+    h1 .accent { color: var(--yellow); }
+
+    .hero-desc {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 440px;
+      margin-bottom: 40px;
+    }
+
+    .hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--yellow);
+      color: var(--black);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
       font-size: 13px;
-      width: 28px;
-      height: 28px;
+      letter-spacing: 1px;
+      padding: 16px 32px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary:hover { opacity: 0.88; }
+
+    .btn-secondary {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
       display: flex;
       align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      gap: 8px;
+      transition: color 0.2s;
     }
 
-    .step-text { font-size: 14px; color: #ccc; line-height: 1.5; padding-top: 4px; }
+    .btn-secondary:hover { color: var(--text); }
 
-    footer {
-      width: 100%;
-      padding: 20px 32px;
-      border-top: 1px solid #222;
-      text-align: center;
+    .hero-note {
+      margin-top: 20px;
       font-size: 12px;
-      color: #555;
+      color: #444;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── PHONE MOCKUP ── */
+    .hero-right {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .mockup-wrap {
+      position: relative;
+      width: 260px;
+    }
+
+    .phone {
+      width: 260px;
+      height: 520px;
+      background: var(--card);
+      border-radius: 36px;
+      border: 2px solid #2a2a2a;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px #333;
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px; height: 24px;
+      background: var(--black);
+      border-radius: 12px;
+      z-index: 10;
+    }
+
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(160deg, #141414 0%, #1a1a1a 100%);
+      padding: 60px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .screen-bar {
+      background: var(--yellow);
+      border-radius: 4px;
+      height: 8px;
+      width: 100%;
+    }
+
+    .screen-bar.short { width: 60%; opacity: 0.5; }
+
+    .screen-map {
+      flex: 1;
+      background: #222;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-pin {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .map-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(245,197,24,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,197,24,0.06) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    .map-route {
+      position: absolute;
+      top: 30%; left: 20%;
+      width: 60%; height: 40%;
+      border: 2px dashed rgba(245,197,24,0.4);
+      border-radius: 0 20px 0 20px;
+    }
+
+    .screen-card {
+      background: #252525;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .screen-card-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .screen-label { font-size: 9px; color: #666; font-family: 'Space Grotesk', sans-serif; letter-spacing: 1px; }
+    .screen-value { font-size: 13px; font-weight: 700; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+    .screen-price { font-size: 16px; font-weight: 900; color: var(--yellow); font-family: 'Space Grotesk', sans-serif; }
+
+    .screen-btn {
+      margin-top: 8px;
+      background: var(--yellow);
+      color: var(--black);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      font-family: 'Space Grotesk', sans-serif;
+      text-align: center;
+      padding: 7px;
+      border-radius: 4px;
+    }
+
+    /* floating badges */
+    .badge-float {
+      position: absolute;
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .badge-float span { color: var(--yellow); }
+    .badge-left  { left: -80px; top: 30%; }
+    .badge-right { right: -70px; bottom: 28%; }
+
+    /* yellow bar behind phone */
+    .phone-bar {
+      position: absolute;
+      right: -30px; top: 60px; bottom: 60px;
+      width: 6px;
+      background: var(--yellow);
+      border-radius: 3px;
+    }
+
+    /* ── FEATURES ── */
+    .section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 48px;
+    }
+
+    .section-tag {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: var(--yellow);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      margin-bottom: 48px;
+      max-width: 480px;
+      line-height: 1.1;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2px;
+    }
+
+    .feature-card {
+      background: var(--card);
+      padding: 32px 28px;
+      border-top: 3px solid var(--yellow);
+      transition: background 0.2s;
+    }
+
+    .feature-card:hover { background: #202020; }
+
+    .feature-icon {
+      width: 44px; height: 44px;
+      background: rgba(245,197,24,0.1);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .feature-icon svg { width: 22px; height: 22px; stroke: var(--yellow); fill: none; stroke-width: 2; }
+
+    .feature-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ── INSTALL ── */
+    .install-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 48px 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .install-steps { display: flex; flex-direction: column; gap: 0; }
+
+    .install-step {
+      display: flex;
+      gap: 20px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .install-step:first-child { border-top: 1px solid var(--line); }
+
+    .step-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: rgba(245,197,24,0.2);
+      line-height: 1;
+      flex-shrink: 0;
+      width: 48px;
+    }
+
+    .step-content h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .step-content p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    .install-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 24px; }
+
+    .apk-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .apk-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .apk-meta-row svg { width: 16px; height: 16px; stroke: var(--yellow); fill: none; stroke-width: 2; flex-shrink: 0; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 24px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #444;
+    }
+
+    .footer-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: var(--yellow);
+      font-size: 14px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 100px 24px 60px;
+        text-align: center;
+      }
+
+      .hero-left { align-items: center; }
+      .hero-desc { text-align: center; }
+      .hero-note { justify-content: center; }
+
+      .hero-right { order: -1; }
+      .badge-left, .badge-right { display: none; }
+      .mockup-wrap { width: 200px; }
+      .phone { width: 200px; height: 400px; }
+
+      .section { padding: 60px 24px; }
+      .install-section { grid-template-columns: 1fr; padding: 0 24px 60px; gap: 40px; }
+      footer { flex-direction: column; gap: 8px; text-align: center; }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="logo">TWMB</div>
-  </header>
-
-  <div class="hero">
-    <div class="badge">NOW AVAILABLE · ZAMBIA</div>
-    <h1>Ride Smarter.<br/><span>Share Costs.</span></h1>
-    <p class="sub">Book a seat on scheduled rides across Kitwe and beyond. Share the fare, skip the hassle.</p>
-
-    <a class="download-btn" href="https://github.com/lumbilumbi200-byte/twambo/releases/download/v1.0.0/app-release.apk" download>
-      <svg viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/>
-      </svg>
-      DOWNLOAD FOR ANDROID
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">TWMB</div>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#install">Install</a></li>
+    </ul>
+    <a class="nav-cta" href="https://github.com/lumbilumbi200-byte/twambo/releases/download/v1.0.0/app-release.apk" download>
+      DOWNLOAD APK
     </a>
+  </nav>
 
-    <p class="note">Android 6.0 and above · 55 MB</p>
-  </div>
+  <!-- HERO -->
+  <section style="background: radial-gradient(ellipse 60% 50% at 70% 50%, rgba(245,197,24,0.06) 0%, transparent 70%);">
+    <div class="hero">
+      <div class="hero-left">
+        <div class="hero-tag">AVAILABLE NOW · ZAMBIA</div>
+        <h1>Share The<br/>Ride, Split<br/>The <span class="accent">Fare.</span></h1>
+        <p class="hero-desc">
+          Book a seat on scheduled rides across Kitwe. Multiple riders share one car — and split the cost automatically.
+        </p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="https://github.com/lumbilumbi200-byte/twambo/releases/download/v1.0.0/app-release.apk" download>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/>
+            </svg>
+            DOWNLOAD FOR ANDROID
+          </a>
+          <a class="btn-secondary" href="#install">
+            How to install
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+        <p class="hero-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="2"/>
+          </svg>
+          Android 6.0 or higher &nbsp;·&nbsp; 55 MB
+        </p>
+      </div>
 
-  <div class="features">
-    <div class="feature">
-      <div class="feature-icon">🚗</div>
-      <div class="feature-title">Scheduled Rides</div>
-      <div class="feature-desc">Book seats on planned trips in advance</div>
+      <div class="hero-right">
+        <div class="mockup-wrap">
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="screen-bar"></div>
+              <div class="screen-bar short"></div>
+              <div class="screen-map">
+                <div class="map-grid"></div>
+                <div class="map-route"></div>
+                <div class="map-pin">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="#F5C518">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="screen-card">
+                <div class="screen-card-row">
+                  <div>
+                    <div class="screen-label">KITWE → NDOLA</div>
+                    <div class="screen-value">07:30 AM · 3 seats</div>
+                  </div>
+                  <div class="screen-price">K35</div>
+                </div>
+                <div class="screen-btn">BOOK SEAT</div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-bar"></div>
+          <div class="badge-float badge-left">
+            <div style="color:#888;font-size:10px;margin-bottom:2px">SHARED FARE</div>
+            <span>K35 / seat</span>
+          </div>
+          <div class="badge-float badge-right">
+            <div style="color:#888;font-size:10px;margin-bottom:2px">RIDERS</div>
+            <span>4 booked</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="feature">
-      <div class="feature-icon">💰</div>
-      <div class="feature-title">Share the Fare</div>
-      <div class="feature-desc">Cost splits across all riders automatically</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">📍</div>
-      <div class="feature-title">Live Tracking</div>
-      <div class="feature-desc">Track your driver in real time</div>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">🔁</div>
-      <div class="feature-title">Recurring Trips</div>
-      <div class="feature-desc">Set up daily commutes automatically</div>
-    </div>
-  </div>
+  </section>
 
-  <div class="install-steps">
-    <h2>HOW TO INSTALL</h2>
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-text">Tap <strong>Download for Android</strong> above</div>
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="section">
+      <div class="section-tag">WHY TWAMBO</div>
+      <h2 class="section-title">Everything you need in one ride.</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+          <div class="feature-title">Scheduled Rides</div>
+          <div class="feature-desc">Drivers post trips in advance. Book your seat before it fills up.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="feature-title">Recurring Trips</div>
+          <div class="feature-desc">Set up your daily commute once. Twambo handles the rest automatically.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          </div>
+          <div class="feature-title">Live Tracking</div>
+          <div class="feature-desc">Watch your driver move in real time on the map.</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div class="feature-title">Shared Fares</div>
+          <div class="feature-desc">More riders means a lower cost per seat. Always fair, always split.</div>
+        </div>
+      </div>
     </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-text">Open your Downloads and tap <strong>app-release.apk</strong></div>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-text">If prompted, allow <strong>Install from unknown sources</strong> in Settings</div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-text">Tap <strong>Install</strong> and open Twambo</div>
-    </div>
-  </div>
+  </section>
 
+  <!-- INSTALL -->
+  <section id="install">
+    <div class="install-section">
+      <div>
+        <div class="section-tag">GETTING STARTED</div>
+        <h2 class="section-title">Install in under a minute.</h2>
+        <div class="install-steps">
+          <div class="install-step">
+            <div class="step-num">01</div>
+            <div class="step-content">
+              <h3>Download the APK</h3>
+              <p>Tap the download button and save the file to your phone.</p>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="step-num">02</div>
+            <div class="step-content">
+              <h3>Allow Unknown Sources</h3>
+              <p>Go to Settings → Security → enable "Install from unknown sources".</p>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="step-num">03</div>
+            <div class="step-content">
+              <h3>Open &amp; Install</h3>
+              <p>Open the downloaded file and tap Install. Done.</p>
+            </div>
+          </div>
+          <div class="install-step">
+            <div class="step-num">04</div>
+            <div class="step-content">
+              <h3>Create Your Account</h3>
+              <p>Sign up as a rider or driver and start your first trip.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="install-cta">
+        <div class="apk-meta">
+          <div class="apk-meta-row">
+            <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/></svg>
+            Android 6.0 and above
+          </div>
+          <div class="apk-meta-row">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            55 MB download
+          </div>
+          <div class="apk-meta-row">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Version 1.0.0
+          </div>
+        </div>
+        <a class="btn-primary" href="https://github.com/lumbilumbi200-byte/twambo/releases/download/v1.0.0/app-release.apk" download>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/>
+          </svg>
+          DOWNLOAD FOR ANDROID
+        </a>
+        <p style="font-size:12px;color:#444;">Free · No account required to download</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
   <footer>
-    &copy; 2026 Twambo · Kitwe, Zambia
+    <div class="footer-logo">TWMB</div>
+    <div>&copy; 2026 Twambo &nbsp;·&nbsp; Kitwe, Zambia</div>
+    <div><a href="/dashboard/" style="color:#555;text-decoration:none;">Admin</a></div>
   </footer>
 
 </body>
