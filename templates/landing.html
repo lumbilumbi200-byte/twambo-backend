@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Twambo — Ride Sharing for Zambia</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d0d0d;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      padding: 20px 32px;
+      border-bottom: 3px solid #f5c518;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: #f5c518;
+    }
+
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 24px 40px;
+      max-width: 600px;
+    }
+
+    .badge {
+      background: #f5c518;
+      color: #0d0d0d;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      padding: 4px 12px;
+      margin-bottom: 24px;
+      display: inline-block;
+    }
+
+    h1 {
+      font-size: clamp(36px, 8vw, 64px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+
+    h1 span { color: #f5c518; }
+
+    p.sub {
+      font-size: 16px;
+      color: #aaa;
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #f5c518;
+      color: #0d0d0d;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      padding: 16px 36px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .download-btn:hover { opacity: 0.85; }
+
+    .download-btn svg { width: 22px; height: 22px; }
+
+    .note {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 600px;
+      padding: 0 24px 60px;
+    }
+
+    .feature {
+      background: #1a1a1a;
+      padding: 20px 16px;
+      border-left: 3px solid #f5c518;
+    }
+
+    .feature-icon { font-size: 24px; margin-bottom: 8px; }
+    .feature-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .feature-desc { font-size: 12px; color: #888; line-height: 1.4; }
+
+    .install-steps {
+      width: 100%;
+      max-width: 600px;
+      padding: 0 24px 60px;
+    }
+
+    .install-steps h2 {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #f5c518;
+      margin-bottom: 16px;
+    }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      background: #f5c518;
+      color: #0d0d0d;
+      font-weight: 900;
+      font-size: 13px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-text { font-size: 14px; color: #ccc; line-height: 1.5; padding-top: 4px; }
+
+    footer {
+      width: 100%;
+      padding: 20px 32px;
+      border-top: 1px solid #222;
+      text-align: center;
+      font-size: 12px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">TWMB</div>
+  </header>
+
+  <div class="hero">
+    <div class="badge">NOW AVAILABLE · ZAMBIA</div>
+    <h1>Ride Smarter.<br/><span>Share Costs.</span></h1>
+    <p class="sub">Book a seat on scheduled rides across Kitwe and beyond. Share the fare, skip the hassle.</p>
+
+    <a class="download-btn" href="https://github.com/lumbilumbi200-byte/twambo/releases/download/v1.0.0/app-release.apk" download>
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/>
+      </svg>
+      DOWNLOAD FOR ANDROID
+    </a>
+
+    <p class="note">Android 6.0 and above · 55 MB</p>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🚗</div>
+      <div class="feature-title">Scheduled Rides</div>
+      <div class="feature-desc">Book seats on planned trips in advance</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">💰</div>
+      <div class="feature-title">Share the Fare</div>
+      <div class="feature-desc">Cost splits across all riders automatically</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📍</div>
+      <div class="feature-title">Live Tracking</div>
+      <div class="feature-desc">Track your driver in real time</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔁</div>
+      <div class="feature-title">Recurring Trips</div>
+      <div class="feature-desc">Set up daily commutes automatically</div>
+    </div>
+  </div>
+
+  <div class="install-steps">
+    <h2>HOW TO INSTALL</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Tap <strong>Download for Android</strong> above</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">Open your Downloads and tap <strong>app-release.apk</strong></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">If prompted, allow <strong>Install from unknown sources</strong> in Settings</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">Tap <strong>Install</strong> and open Twambo</div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 Twambo · Kitwe, Zambia
+  </footer>
+
+</body>
+</html>

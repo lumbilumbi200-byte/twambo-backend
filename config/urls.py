@@ -2,13 +2,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import render
 from apps.accounts.admin import TwamboAdminSite
 from apps.dashboard.views import public_slides
+
+def landing(request):
+    return render(request, 'landing.html')
 
 # Replace the default admin site with our custom one
 admin.site.__class__ = TwamboAdminSite
 
 urlpatterns = [
+    path('', landing, name='landing'),
     path('admin/', admin.site.urls),
     path('dashboard/', include('apps.dashboard.urls', namespace='dashboard')),
     path('api/v1/slides/', public_slides, name='public_slides'),
