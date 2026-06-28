@@ -151,8 +151,56 @@
 
 </div>
 
+<!-- Riders list -->
+<div class="tw-section" style="margin-top:28px;">Riders (Recent 10)</div>
+<table class="tw-table" style="margin-bottom:6px;">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>Strikes</th>
+      <th>Joined</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for rider in rider_list %}
+    <tr>
+      <td style="font-weight:600;">
+        <a href="{% url 'admin:accounts_user_change' rider.pk %}" style="color:#1565c0;text-decoration:none;">
+          {{ rider.full_name }}
+        </a>
+        {% if rider.is_banned %}<span class="pill manual" style="margin-left:6px;">Banned</span>{% endif %}
+      </td>
+      <td style="color:#555;">{{ rider.phone_number }}</td>
+      <td style="text-align:center;">
+        {% if rider.strike_count > 0 %}
+          <span style="color:#c62828;font-weight:700;">{{ rider.strike_count }}</span>
+        {% else %}
+          <span style="color:#999;">0</span>
+        {% endif %}
+      </td>
+      <td style="color:#999;font-size:11px;">{{ rider.created_at|date:"d M Y" }}</td>
+      <td>
+        <a href="{% url 'admin:accounts_user_delete_account' rider.pk %}"
+           style="background:#37474f;color:#fff;padding:3px 10px;font-size:11px;text-decoration:none;font-weight:700;">
+          Delete
+        </a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" style="color:#999;text-align:center;padding:20px;">No riders yet</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+<p style="margin-top:4px;margin-bottom:28px;">
+  <a href="{% url 'admin:accounts_user_changelist' %}?role__exact=rider" style="font-size:12px;color:#1565c0;">
+    View all {{ total_riders }} riders →
+  </a>
+</p>
+
 <!-- Standard Django app list below -->
-<div class="tw-section" style="margin-top:28px;">All Modules</div>
+<div class="tw-section">All Modules</div>
 {% include "admin/app_index.html" %}
 
 {% endblock %}

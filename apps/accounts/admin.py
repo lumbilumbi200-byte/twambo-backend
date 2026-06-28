@@ -420,6 +420,7 @@ class TwamboAdminSite(admin.AdminSite):
             'pending_driver_list': DriverProfile.objects.filter(
                 verification_status=DriverProfile.STATUS_PENDING
             ).select_related('user').order_by('created_at')[:5],
+            'rider_list': User.objects.filter(role='rider').order_by('-created_at')[:10],
         }
 
         extra_context = extra_context or {}
