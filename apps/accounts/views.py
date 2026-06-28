@@ -164,43 +164,34 @@ def verify_phone(request):
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def forgot_password(request):
-    """Check that a user with this phone exists before triggering OTP on the client."""
-    phone = request.data.get('phone_number', '').strip()
-    if not phone:
-        return Response({'detail': 'phone_number required.'}, status=status.HTTP_400_BAD_REQUEST)
-    exists = User.objects.filter(phone_number=phone).exists()
-    if not exists:
-        return Response({'detail': 'No account found with this number.'}, status=status.HTTP_404_NOT_FOUND)
+    """Kept for URL compatibility — not used in current flow."""
     return Response({'detail': 'ok'})
 
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def reset_password(request):
-    """
-    Verify Firebase OTP id_token (proves ownership of phone),
-    then update the password for that phone number.
-    """
+    """Reset password by matching full_name + phone_number. No OTP required."""
     phone    = request.data.get('phone_number', '').strip()
-    id_token = request.data.get('id_token', '').strip()
+    name     = request.data.get('full_name', '').strip()
     new_pass = request.data.get('new_password', '')
 
-    if not phone or not id_token or not new_pass:
-        return Response({'detail': 'phone_number, id_token and new_password are required.'},
+    if not phone or not name or not new_pass:
+        return Response({'detail': 'Phone number, full name and new password are all required.'},
                         status=status.HTTP_400_BAD_REQUEST)
     if len(new_pass) < 6:
         return Response({'detail': 'Password must be at least 6 characters.'},
                         status=status.HTTP_400_BAD_REQUEST)
-    try:
-        import firebase_admin.auth as fb_auth
-        fb_auth.verify_id_token(id_token)
-    except Exception as e:
-        return Response({'detail': f'OTP verification failed: {e}'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         user = User.objects.get(phone_number=phone)
     except User.DoesNotExist:
-        return Response({'detail': 'No account found with this number.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'No account found with that phone number.'},
+                        status=status.HTTP_404_NOT_FOUND)
+
+    if user.full_name.strip().lower() != name.lower():
+        return Response({'detail': 'Name does not match our records.'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
     user.set_password(new_pass)
     user.save(update_fields=['password'])
