@@ -37,7 +37,10 @@ def dash_login(request):
         password = request.POST.get('password', '')
         # Look up staff user by full name, then authenticate via phone_number
         try:
-            staff_user = User.objects.get(full_name__iexact=name, is_staff=True)
+            from django.db.models import Q
+            staff_user = User.objects.get(
+                Q(full_name__iexact=name) | Q(phone_number=name), is_staff=True
+            )
             user = authenticate(request, username=staff_user.phone_number, password=password)
         except User.DoesNotExist:
             user = None

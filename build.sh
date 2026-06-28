@@ -21,6 +21,8 @@ phone = os.environ.get('DJANGO_SUPERUSER_PHONE')
 password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
 email = os.environ.get('DJANGO_SUPERUSER_EMAIL', '')
 if phone and password and not User.objects.filter(phone_number=phone).exists():
-    User.objects.create_superuser(phone_number=phone, password=password, email=email)
+    u = User.objects.create_superuser(phone_number=phone, password=password, email=email)
+    u.full_name = os.environ.get('DJANGO_SUPERUSER_NAME', 'Admin')
+    u.save(update_fields=['full_name'])
     print(f'Superuser created: {phone}')
 EOF
