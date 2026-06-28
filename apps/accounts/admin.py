@@ -105,8 +105,31 @@ class UserAdmin(BaseUserAdmin):
             path('<int:pk>/unban/',
                  self.admin_site.admin_view(self._unban_view),
                  name='accounts_user_unban'),
+            path('<int:pk>/delete-account/',
+                 self.admin_site.admin_view(self._delete_account_view),
+                 name='accounts_user_delete_account'),
         ]
         return custom + urls
+
+    def _delete_account_view(self, request, pk):
+        user = User.objects.get(pk=pk)
+        if request.method == 'POST':
+            name = user.full_name
+            phone = user.phone_number
+            user.delete()
+            self.message_user(
+                request,
+                f'Account for {name} ({phone}) has been deleted. '
+                f'That phone number is now free to re-register.',
+                messages.SUCCESS,
+            )
+            return HttpResponseRedirect(reverse('admin:accounts_user_changelist'))
+        context = dict(
+            self.admin_site.each_context(request),
+            target_user=user,
+            title=f'Delete Account — {user.full_name}',
+        )
+        return TemplateResponse(request, 'admin/accounts/user/delete_account.html', context)
 
     def _give_strike_view(self, request, pk):
         user = User.objects.get(pk=pk)
@@ -165,22 +188,27 @@ class UserAdmin(BaseUserAdmin):
     @admin.display(description='Actions')
     def quick_actions(self, obj):
         strike_url = reverse('admin:accounts_user_give_strike', args=[obj.pk])
+        delete_url = reverse('admin:accounts_user_delete_account', args=[obj.pk])
+        del_btn = (
+            '<a href="{d}" style="background:#37474f;color:#fff;padding:3px 8px;'
+            'border-radius:3px;text-decoration:none;font-size:11px;margin-left:4px;">Delete</a>'
+        )
         if obj.is_banned:
             unban_url = reverse('admin:accounts_user_unban', args=[obj.pk])
             return format_html(
                 '<a href="{s}" style="background:#e65100;color:#fff;padding:3px 8px;'
                 'border-radius:3px;text-decoration:none;font-size:11px;margin-right:4px;">+Strike</a>'
                 '<a href="{u}" style="background:#2e7d32;color:#fff;padding:3px 8px;'
-                'border-radius:3px;text-decoration:none;font-size:11px;">Unban</a>',
-                s=strike_url, u=unban_url,
+                'border-radius:3px;text-decoration:none;font-size:11px;">Unban</a>' + del_btn,
+                s=strike_url, u=unban_url, d=delete_url,
             )
         ban_url = reverse('admin:accounts_user_ban', args=[obj.pk])
         return format_html(
             '<a href="{s}" style="background:#e65100;color:#fff;padding:3px 8px;'
             'border-radius:3px;text-decoration:none;font-size:11px;margin-right:4px;">+Strike</a>'
             '<a href="{b}" style="background:#c62828;color:#fff;padding:3px 8px;'
-            'border-radius:3px;text-decoration:none;font-size:11px;">Ban</a>',
-            s=strike_url, b=ban_url,
+            'border-radius:3px;text-decoration:none;font-size:11px;">Ban</a>' + del_btn,
+            s=strike_url, b=ban_url, d=delete_url,
         )
 
     # ── Bulk actions ──────────────────────────────────────────────────────────
