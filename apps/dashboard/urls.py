@@ -20,6 +20,7 @@ urlpatterns = [
     path('users/<int:pk>/strike/',    views.give_strike,   name='give_strike'),
     path('users/<int:pk>/ban/',       views.ban_user,      name='ban_user'),
     path('users/<int:pk>/unban/',     views.unban_user,    name='unban_user'),
+    path('users/<int:pk>/delete/',    views.delete_user,   name='delete_user'),
     path('strikes/<int:strike_pk>/remove/', views.remove_strike, name='remove_strike'),
 
     path('strikes/',   views.strikes_log, name='strikes'),

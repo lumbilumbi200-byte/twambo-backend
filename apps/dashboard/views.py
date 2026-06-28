@@ -277,6 +277,20 @@ def unban_user(request, pk):
     return redirect(request.POST.get('next', 'dashboard:home'))
 
 
+@staff_required
+@require_POST
+def delete_user(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    name  = user.full_name
+    phone = user.phone_number
+    user.delete()
+    messages.success(
+        request,
+        f'Account for {name} ({phone}) deleted. That number can now re-register.',
+    )
+    return redirect(request.POST.get('next', 'dashboard:riders'))
+
+
 # ── Strikes log ───────────────────────────────────────────────────────────────
 
 @staff_required
