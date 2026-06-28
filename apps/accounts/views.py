@@ -62,6 +62,11 @@ class DriverDocumentsView(generics.UpdateAPIView):
     def get_object(self):
         return self.request.user.driver_profile
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        instance.verification_status = instance.STATUS_PENDING
+        instance.save(update_fields=['verification_status', 'updated_at'])
+
 
 class DriverOnlineToggleView(generics.GenericAPIView):
     def post(self, request):
