@@ -244,6 +244,9 @@ def wallet_topup(request):
     if amount <= 0:
         return Response({'detail': 'Amount must be greater than zero.'}, status=status.HTTP_400_BAD_REQUEST)
 
+    if amount < Decimal('50'):
+        return Response({'detail': 'Minimum top-up is K50.'}, status=status.HTTP_400_BAD_REQUEST)
+
     reference = str(request.data.get('reference', '')).strip()
     wallet, _ = DriverWallet.objects.get_or_create(driver=request.user)
     wallet.top_up(amount, reference=reference, description='Wallet top-up')

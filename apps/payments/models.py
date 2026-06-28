@@ -14,7 +14,7 @@ class DriverWallet(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wallet'
     )
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0'))
-    minimum_float = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal('50'))
+    minimum_float = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal('1'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
