@@ -1,0 +1,158 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<style>
+  .tw-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .tw-card { background: #fff; border-left: 4px solid #1565c0; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .tw-card.yellow { border-left-color: #ffc300; }
+  .tw-card.red    { border-left-color: #c62828; }
+  .tw-card.green  { border-left-color: #2e7d32; }
+  .tw-card.orange { border-left-color: #e65100; }
+  .tw-val  { font-size: 32px; font-weight: 800; color: #1a1a1a; line-height: 1; }
+  .tw-lbl  { font-size: 10px; font-weight: 700; color: #6b6b6b; letter-spacing: 1.2px; text-transform: uppercase; margin-top: 4px; }
+  .tw-section { font-size: 10px; font-weight: 800; color: #6b6b6b; letter-spacing: 1.5px; text-transform: uppercase; margin: 24px 0 10px; }
+  .tw-table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .tw-table th { text-align: left; font-size: 10px; font-weight: 700; color: #6b6b6b; letter-spacing: 1px; text-transform: uppercase; padding: 10px 14px; border-bottom: 1px solid #e8d5a3; }
+  .tw-table td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f5f5f5; }
+  .tw-table tr:hover td { background: #fffbf0; }
+  .pill { display: inline-block; padding: 2px 8px; font-size: 10px; font-weight: 700; border-radius: 2px; }
+  .pill.auto { background: #fff3e0; color: #e65100; }
+  .pill.manual { background: #fce4ec; color: #c62828; }
+  .tw-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 800px) { .tw-two { grid-template-columns: 1fr; } }
+</style>
+
+<h2 style="margin-bottom:16px;font-size:22px;font-weight:800;letter-spacing:.5px;">Operations Dashboard</h2>
+
+<!-- KPI row 1: Users -->
+<div class="tw-section">Users</div>
+<div class="tw-grid">
+  <div class="tw-card blue">
+    <div class="tw-val">{{ total_riders }}</div>
+    <div class="tw-lbl">Riders</div>
+  </div>
+  <div class="tw-card yellow">
+    <div class="tw-val">{{ total_drivers }}</div>
+    <div class="tw-lbl">Drivers</div>
+  </div>
+  <div class="tw-card orange">
+    <div class="tw-val">{{ pending_drivers }}</div>
+    <div class="tw-lbl">Pending Approval</div>
+  </div>
+  <div class="tw-card red">
+    <div class="tw-val">{{ banned_users }}</div>
+    <div class="tw-lbl">Banned</div>
+  </div>
+  <div class="tw-card orange">
+    <div class="tw-val">{{ users_with_strikes }}</div>
+    <div class="tw-lbl">Have Strikes</div>
+  </div>
+</div>
+
+<!-- KPI row 2: Trips / Money -->
+<div class="tw-section">Today &amp; Revenue</div>
+<div class="tw-grid">
+  <div class="tw-card green">
+    <div class="tw-val">{{ trips_today }}</div>
+    <div class="tw-lbl">Trips Today</div>
+  </div>
+  <div class="tw-card green">
+    <div class="tw-val">{{ active_trips }}</div>
+    <div class="tw-lbl">Active Now</div>
+  </div>
+  <div class="tw-card blue">
+    <div class="tw-val">{{ bookings_today }}</div>
+    <div class="tw-lbl">Bookings Today</div>
+  </div>
+  <div class="tw-card yellow">
+    <div class="tw-val">K{{ revenue_month|floatformat:0 }}</div>
+    <div class="tw-lbl">Commission This Month</div>
+  </div>
+</div>
+
+<div class="tw-two">
+
+  <!-- Recent strikes -->
+  <div>
+    <div class="tw-section">Recent Strikes</div>
+    <table class="tw-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Reason</th>
+          <th>Type</th>
+          <th>When</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in recent_strikes %}
+        <tr>
+          <td>
+            <a href="{% url 'admin:accounts_user_change' s.user.pk %}" style="color:#1565c0;text-decoration:none;font-weight:600;">
+              {{ s.user.full_name }}
+            </a>
+            <span style="color:#999;font-size:11px;"> ({{ s.user.role }})</span>
+          </td>
+          <td>{{ s.get_reason_display }}</td>
+          <td>
+            {% if s.auto_generated %}
+              <span class="pill auto">Auto</span>
+            {% else %}
+              <span class="pill manual">Manual</span>
+            {% endif %}
+          </td>
+          <td style="color:#999;font-size:11px;">{{ s.created_at|date:"d M H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="color:#999;text-align:center;padding:20px;">No strikes yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if recent_strikes %}
+    <p style="margin-top:6px;"><a href="{% url 'admin:accounts_strike_changelist' %}" style="font-size:12px;color:#1565c0;">View all strikes →</a></p>
+    {% endif %}
+  </div>
+
+  <!-- Pending driver approvals -->
+  <div>
+    <div class="tw-section">Pending Driver Approvals</div>
+    <table class="tw-table">
+      <thead>
+        <tr>
+          <th>Driver</th>
+          <th>Phone</th>
+          <th>Applied</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for dp in pending_driver_list %}
+        <tr>
+          <td style="font-weight:600;">{{ dp.user.full_name }}</td>
+          <td style="color:#555;">{{ dp.user.phone_number }}</td>
+          <td style="color:#999;font-size:11px;">{{ dp.created_at|date:"d M" }}</td>
+          <td>
+            <a href="{% url 'admin:accounts_driverprofile_change' dp.pk %}"
+               style="background:#1565c0;color:#fff;padding:3px 8px;font-size:11px;text-decoration:none;font-weight:700;">
+              Review
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" style="color:#999;text-align:center;padding:20px;">No pending drivers</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if pending_drivers > pending_driver_list|length %}
+    <p style="margin-top:6px;"><a href="{% url 'admin:accounts_driverprofile_changelist' %}?verification_status__exact=pending" style="font-size:12px;color:#1565c0;">View all {{ pending_drivers }} pending →</a></p>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Standard Django app list below -->
+<div class="tw-section" style="margin-top:28px;">All Modules</div>
+{% include "admin/app_index.html" %}
+
+{% endblock %}

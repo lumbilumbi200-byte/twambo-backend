@@ -1,0 +1,36 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<div style="max-width:560px;">
+  <h2 style="margin-bottom:4px;">Give Strike</h2>
+  <p style="color:#666;margin-top:0;">
+    User: <strong>{{ target_user.full_name }}</strong>
+    ({{ target_user.phone_number }}) &mdash;
+    current strikes: <strong>{{ target_user.strike_count }} / 5</strong>
+    {% if target_user.is_banned %}<span style="color:#c62828;font-weight:bold;"> BANNED</span>{% endif %}
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <p><label for="reason"><strong>Reason</strong></label></p>
+    <select name="reason" id="reason" style="width:100%;padding:8px;font-size:14px;border:1px solid #ccc;margin-bottom:16px;">
+      {% for value, label in reason_choices %}
+        <option value="{{ value }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <p><label for="notes"><strong>Notes</strong> (shown in strike log)</label></p>
+    <textarea name="notes" id="notes" rows="4"
+      style="width:100%;padding:8px;font-size:14px;border:1px solid #ccc;margin-bottom:20px;"
+      placeholder="Describe the incident…"></textarea>
+
+    <div>
+      <input type="submit" value="Add Strike"
+        style="background:#e65100;color:#fff;border:none;padding:10px 24px;
+               font-size:14px;font-weight:bold;cursor:pointer;margin-right:12px;">
+      <a href="{% url 'admin:accounts_user_change' target_user.pk %}"
+         style="color:#555;text-decoration:none;">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

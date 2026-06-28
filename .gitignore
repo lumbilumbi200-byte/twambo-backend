@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual env
+venv/
+env/
+.venv/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Environment
+.env
+.env.*
+
+# Firebase — never commit credentials
+firebase-credentials.json
+firebase-credentials.json.json
+*-firebase-adminsdk-*.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store

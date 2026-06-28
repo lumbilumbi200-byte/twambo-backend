@@ -1,0 +1,118 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Overview — TWAMBO Dashboard{% endblock %}
+{% block topbar_title %}Overview{% endblock %}
+
+{% block content %}
+
+{# ── KPI row 1 ── #}
+<div class="section-label">Users</div>
+<div class="row g-3 mb-4">
+  <div class="col"><div class="stat-card">
+    <div class="stat-val">{{ total_riders }}</div>
+    <div class="stat-lbl">Riders</div>
+  </div></div>
+  <div class="col"><div class="stat-card yellow">
+    <div class="stat-val">{{ total_drivers }}</div>
+    <div class="stat-lbl">Drivers</div>
+  </div></div>
+  <div class="col"><div class="stat-card orange">
+    <div class="stat-val">{{ pending_drivers }}</div>
+    <div class="stat-lbl">Pending Approval</div>
+  </div></div>
+  <div class="col"><div class="stat-card red">
+    <div class="stat-val">{{ banned_users }}</div>
+    <div class="stat-lbl">Banned</div>
+  </div></div>
+  <div class="col"><div class="stat-card orange">
+    <div class="stat-val">{{ users_with_strikes }}</div>
+    <div class="stat-lbl">Have Strikes</div>
+  </div></div>
+</div>
+
+{# ── KPI row 2 ── #}
+<div class="section-label">Activity &amp; Revenue</div>
+<div class="row g-3 mb-4">
+  <div class="col"><div class="stat-card green">
+    <div class="stat-val">{{ trips_today }}</div>
+    <div class="stat-lbl">Trips Today</div>
+  </div></div>
+  <div class="col"><div class="stat-card green">
+    <div class="stat-val">{{ active_trips }}</div>
+    <div class="stat-lbl">Active Now</div>
+  </div></div>
+  <div class="col"><div class="stat-card">
+    <div class="stat-val">{{ bookings_today }}</div>
+    <div class="stat-lbl">Bookings Today</div>
+  </div></div>
+  <div class="col"><div class="stat-card yellow">
+    <div class="stat-val" style="font-size:24px;">K{{ revenue_month|floatformat:0 }}</div>
+    <div class="stat-lbl">Commission (Month)</div>
+  </div></div>
+</div>
+
+{# ── Two-column bottom ── #}
+<div class="row g-4">
+
+  {# Recent strikes #}
+  <div class="col-lg-7">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="section-label mb-0">Recent Strikes</div>
+      <a href="{% url 'dashboard:strikes' %}" style="font-size:11px;color:var(--tw-blue);">View all →</a>
+    </div>
+    <div class="bg-white">
+      <table class="table tw-table mb-0">
+        <thead><tr>
+          <th>User</th><th>Role</th><th>Reason</th><th>Type</th><th>When</th>
+        </tr></thead>
+        <tbody>
+          {% for s in recent_strikes %}
+          <tr>
+            <td>
+              <a class="row-link" href="{% if s.user.role == 'rider' %}{% url 'dashboard:rider_detail' s.user.pk %}{% else %}{% url 'dashboard:driver_detail' s.user.pk %}{% endif %}">
+                <div class="page-user-name">{{ s.user.full_name }}</div>
+                <div class="page-user-phone">{{ s.user.phone_number }}</div>
+              </a>
+            </td>
+            <td><span style="font-size:11px;font-weight:600;color:var(--tw-muted);">{{ s.user.role|upper }}</span></td>
+            <td style="font-size:12px;">{{ s.get_reason_display }}</td>
+            <td>
+              {% if s.auto_generated %}
+                <span class="badge-status" style="background:#fff3e0;color:var(--tw-orange);">Auto</span>
+              {% else %}
+                <span class="badge-status" style="background:#ffebee;color:var(--tw-red);">Manual</span>
+              {% endif %}
+            </td>
+            <td style="font-size:11px;color:var(--tw-muted);">{{ s.created_at|date:"d M H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center py-4" style="color:var(--tw-muted);font-size:13px;">No strikes yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {# Pending drivers #}
+  <div class="col-lg-5">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div class="section-label mb-0">Pending Driver Approvals</div>
+      <a href="{% url 'dashboard:drivers' %}?vstatus=pending" style="font-size:11px;color:var(--tw-blue);">View all →</a>
+    </div>
+    <div class="bg-white">
+      {% for dp in pending_driver_list %}
+      <div class="d-flex align-items-center px-3 py-3" style="border-bottom:1px solid #f0f0f0;">
+        <div style="flex:1;">
+          <div class="page-user-name">{{ dp.user.full_name }}</div>
+          <div class="page-user-phone">{{ dp.user.phone_number }} &mdash; {{ dp.created_at|date:"d M Y" }}</div>
+        </div>
+        <a href="{% url 'dashboard:driver_detail' dp.user.pk %}" class="btn btn-tw-blue" style="font-size:11px;padding:4px 12px;">Review</a>
+      </div>
+      {% empty %}
+      <div class="text-center py-4" style="color:var(--tw-muted);font-size:13px;">No pending drivers</div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

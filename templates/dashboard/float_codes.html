@@ -1,0 +1,169 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Float Codes — TWAMBO{% endblock %}
+{% block topbar_title %}Float Codes{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+  <!-- ── Generate form ── -->
+  <div class="col-lg-4">
+    <div style="background:#fff;border-left:4px solid var(--tw-yellow);padding:20px;">
+      <div class="section-label mb-3">Generate New Code</div>
+
+      {% if generated_code %}
+      <div style="background:#1a1a1a;padding:18px;margin-bottom:20px;border-left:4px solid var(--tw-green);">
+        <div style="font-size:10px;font-weight:700;color:#aaa;letter-spacing:1.5px;margin-bottom:8px;">CODE GENERATED</div>
+        <div style="font-size:22px;font-weight:900;color:var(--tw-yellow);letter-spacing:3px;font-family:monospace;">
+          {{ generated_code.code }}
+        </div>
+        <div style="font-size:12px;color:#aaa;margin-top:6px;">
+          Amount: <strong style="color:#fff;">K{{ generated_code.amount }}</strong>
+          &nbsp;·&nbsp; Expires in {{ generated_code.expires_days }} days
+        </div>
+        <div style="font-size:11px;color:#666;margin-top:8px;">Copy this code and SMS it to the driver. It cannot be retrieved again.</div>
+      </div>
+      {% endif %}
+
+      {% if error %}
+      <div class="alert alert-danger py-2 px-3 mb-3" style="font-size:12px;border-radius:0;">{{ error }}</div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <label class="section-label mb-1">Amount (ZMW)</label>
+        <div class="input-group mb-3">
+          <span class="input-group-text search-box" style="border-radius:0;font-weight:700;">K</span>
+          <input type="number" name="amount" class="form-control search-box" placeholder="e.g. 200" min="1" step="0.01" required>
+        </div>
+
+        <label class="section-label mb-1">Expires in (days)</label>
+        <select name="expires_days" class="form-select search-box mb-4">
+          <option value="7">7 days</option>
+          <option value="14">14 days</option>
+          <option value="30" selected>30 days</option>
+          <option value="60">60 days</option>
+          <option value="90">90 days</option>
+        </select>
+
+        <button type="submit" class="btn btn-tw-yellow w-100" style="padding:10px;font-size:13px;letter-spacing:1px;">
+          <i class="bi bi-plus-circle me-2"></i>GENERATE CODE
+        </button>
+      </form>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-2 mt-1">
+      <div class="col-6">
+        <div class="stat-card green" style="padding:14px 16px;">
+          <div class="stat-val" style="font-size:26px;">{{ page_obj.paginator.count }}</div>
+          <div class="stat-lbl">Total Codes</div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="stat-card yellow" style="padding:14px 16px;">
+          <div class="stat-val" style="font-size:26px;">
+            {{ page_obj.paginator.object_list|length }}
+          </div>
+          <div class="stat-lbl">On This Page</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Codes list ── -->
+  <div class="col-lg-8">
+    <div class="section-label mb-3">All Codes ({{ page_obj.paginator.count }})</div>
+
+    {% if page_obj.object_list %}
+    <table class="table tw-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Generated</th>
+          <th>Redeemed By</th>
+          <th>Expires</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for code in page_obj %}
+        <tr>
+          <td>
+            <span style="font-family:monospace;font-weight:700;font-size:13px;letter-spacing:1px;">
+              {{ code.code }}
+            </span>
+          </td>
+          <td>
+            <strong style="color:var(--tw-green);">K{{ code.amount }}</strong>
+          </td>
+          <td>
+            {% if code.is_used %}
+              <span class="badge-status badge-completed">USED</span>
+            {% elif code.expires_at < now %}
+              <span class="badge-status badge-cancelled">EXPIRED</span>
+            {% else %}
+              <span class="badge-status badge-pending">UNUSED</span>
+            {% endif %}
+          </td>
+          <td>
+            <div style="font-size:12px;">{{ code.created_at|date:"d M Y" }}</div>
+            <div style="font-size:10px;color:var(--tw-muted);">by {{ code.generated_by.full_name|default:"—" }}</div>
+          </td>
+          <td style="font-size:12px;">
+            {% if code.used_by %}
+              <div>{{ code.used_by.full_name }}</div>
+              <div style="font-size:10px;color:var(--tw-muted);">{{ code.used_at|date:"d M Y H:i" }}</div>
+            {% else %}—{% endif %}
+          </td>
+          <td style="font-size:12px;">
+            {{ code.expires_at|date:"d M Y" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav class="mt-3">
+      <ul class="pagination pagination-sm mb-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}" style="border-radius:0;">←</a>
+        </li>
+        {% endif %}
+        <li class="page-item disabled">
+          <span class="page-link" style="border-radius:0;">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+          </span>
+        </li>
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}" style="border-radius:0;">→</a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div style="background:#fff;padding:40px;text-align:center;border-left:4px solid var(--tw-line);">
+      <i class="bi bi-ticket-perforated" style="font-size:36px;color:#ccc;"></i>
+      <div style="font-size:13px;color:var(--tw-muted);margin-top:12px;">No codes generated yet.</div>
+      <div style="font-size:12px;color:#bbb;margin-top:4px;">Use the form on the left to create the first one.</div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Auto-scroll to the generated code box if one was just created
+  {% if generated_code %}
+  document.querySelector('[style*="border-left:4px solid var(--tw-green)"]')?.scrollIntoView({behavior:'smooth', block:'center'});
+  {% endif %}
+</script>
+{% endblock %}

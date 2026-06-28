@@ -1,0 +1,21 @@
+{
+  "folders": [
+    {
+      "name": "Backend (Django)",
+      "path": "."
+    },
+    {
+      "name": "App (Flutter)",
+      "path": "../twambo"
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.python"
+    },
+    "[dart]": {
+      "editor.defaultFormatter": "Dart-Code.dart-code"
+    }
+  }
+}

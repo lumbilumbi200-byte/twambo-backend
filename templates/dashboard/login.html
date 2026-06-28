@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TWAMBO Admin — Sign In</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #111; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .login-box { background: #1a1a1a; width: 360px; padding: 40px; border-top: 4px solid #FFC300; }
+    .brand { font-size: 26px; font-weight: 900; color: #FFC300; letter-spacing: 3px; }
+    .brand-sub { font-size: 10px; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 32px; display: block; }
+    label { font-size: 10px; font-weight: 700; color: #888; letter-spacing: 1.3px; text-transform: uppercase; }
+    input { background: #111 !important; border: 1px solid #333 !important; color: #fff !important; border-radius: 0 !important; font-size: 14px; padding: 10px 12px; }
+    input:focus { border-color: #FFC300 !important; box-shadow: none !important; }
+    .btn-login { background: #FFC300; color: #111; font-weight: 800; font-size: 12px; letter-spacing: 1px; border: none; border-radius: 0; width: 100%; padding: 12px; }
+    .btn-login:hover { background: #e6af00; }
+    .error-box { background: #2a1010; border-left: 3px solid #C62828; color: #ef9a9a; font-size: 12px; padding: 10px 14px; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="brand">TWAMBO</div>
+    <span class="brand-sub">Admin Dashboard</span>
+
+    {% if error %}
+    <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" class="form-control mt-1" placeholder="Your full name" autocomplete="username">
+      </div>
+      <div class="mb-4">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-control mt-1" autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn-login">SIGN IN</button>
+    </form>
+  </div>
+</body>
+</html>

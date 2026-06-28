@@ -1,0 +1,107 @@
+databases:
+  - name: twambo-db
+    plan: free
+    databaseName: twambo
+    user: twambo
+
+services:
+  # ── Redis ──────────────────────────────────────────────────────────────────
+  - type: redis
+    name: twambo-redis
+    plan: free
+    maxmemoryPolicy: noeviction
+
+  # ── Web (ASGI — handles HTTP + WebSocket via daphne) ───────────────────────
+  - type: web
+    name: twambo-api
+    env: python
+    plan: free
+    region: oregon
+    buildCommand: "./build.sh"
+    startCommand: "daphne -b 0.0.0.0 -p $PORT config.asgi:application"
+    nativePackages:
+      - gdal-bin
+      - libgdal-dev
+      - python3-gdal
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://twambo-api.onrender.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: twambo-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: twambo-redis
+          type: redis
+          property: connectionString
+      - key: FIREBASE_CREDENTIALS_PATH
+        value: "/etc/secrets/firebase-credentials.json"
+    # Upload firebase-credentials.json as a Secret File in the Render dashboard
+    # Mount path: /etc/secrets/firebase-credentials.json
+
+  # ── Celery worker ──────────────────────────────────────────────────────────
+  - type: worker
+    name: twambo-celery-worker
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "celery -A config.celery worker --loglevel=info --concurrency=2"
+    nativePackages:
+      - gdal-bin
+      - libgdal-dev
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        fromService:
+          name: twambo-api
+          type: web
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: twambo-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: twambo-redis
+          type: redis
+          property: connectionString
+      - key: FIREBASE_CREDENTIALS_PATH
+        value: "/etc/secrets/firebase-credentials.json"
+
+  # ── Celery beat (scheduled tasks) ─────────────────────────────────────────
+  - type: worker
+    name: twambo-celery-beat
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "celery -A config.celery beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+    nativePackages:
+      - gdal-bin
+      - libgdal-dev
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        fromService:
+          name: twambo-api
+          type: web
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: twambo-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: twambo-redis
+          type: redis
+          property: connectionString

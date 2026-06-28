@@ -1,0 +1,106 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Riders — TWAMBO Dashboard{% endblock %}
+{% block topbar_title %}Riders{% endblock %}
+
+{% block content %}
+
+{# Filter bar #}
+<div class="filter-bar mb-4">
+  <form method="get" class="d-flex gap-2 align-items-center flex-wrap w-100">
+    <input type="text" name="q" value="{{ q }}" class="form-control search-box" style="max-width:240px;" placeholder="Search name or phone…">
+    <select name="status" class="form-select search-box" style="max-width:160px;">
+      <option value="" {% if not status %}selected{% endif %}>All riders</option>
+      <option value="strikes" {% if status == 'strikes' %}selected{% endif %}>Has strikes</option>
+      <option value="banned" {% if status == 'banned' %}selected{% endif %}>Banned</option>
+      <option value="clean" {% if status == 'clean' %}selected{% endif %}>Clean record</option>
+    </select>
+    <button type="submit" class="btn btn-tw-blue">Filter</button>
+    {% if q or status %}<a href="{% url 'dashboard:riders' %}" class="btn btn-light" style="font-size:12px;border-radius:0;">Clear</a>{% endif %}
+    <span class="ms-auto" style="font-size:12px;color:var(--tw-muted);">{{ page_obj.paginator.count }} rider{{ page_obj.paginator.count|pluralize }}</span>
+  </form>
+</div>
+
+<div class="bg-white">
+  <table class="table tw-table mb-0">
+    <thead><tr>
+      <th>Name</th>
+      <th>Phone</th>
+      <th>Strikes</th>
+      <th>Status</th>
+      <th>Joined</th>
+      <th></th>
+    </tr></thead>
+    <tbody>
+      {% for rider in page_obj %}
+      <tr>
+        <td>
+          <a class="row-link" href="{% url 'dashboard:rider_detail' rider.pk %}">
+            <div class="page-user-name">{{ rider.full_name }}</div>
+          </a>
+        </td>
+        <td class="page-user-phone">{{ rider.phone_number }}</td>
+        <td>
+          <div class="strike-dots">
+            {% for i in "12345" %}
+              {% if forloop.counter <= rider.strike_count %}
+                <span class="dot-filled"></span>
+              {% else %}
+                <span class="dot-empty"></span>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <small style="font-size:10px;color:var(--tw-muted);">{{ rider.strike_count }}/5</small>
+        </td>
+        <td>
+          {% if rider.is_banned %}
+            <span class="badge-status badge-banned">BANNED</span>
+          {% else %}
+            <span class="badge-status" style="background:#e8f5e9;color:var(--tw-green);">Active</span>
+          {% endif %}
+        </td>
+        <td style="font-size:11px;color:var(--tw-muted);">{{ rider.created_at|date:"d M Y" }}</td>
+        <td>
+          <div class="d-flex gap-1">
+            <a href="{% url 'dashboard:rider_detail' rider.pk %}" class="btn btn-tw-blue" style="padding:3px 10px;font-size:11px;">View</a>
+            <button class="btn btn-tw-yellow" style="padding:3px 10px;font-size:11px;"
+              data-bs-toggle="modal" data-bs-target="#strikeModal"
+              data-url="{% url 'dashboard:give_strike' rider.pk %}"
+              data-name="{{ rider.full_name }}"
+              data-strikes="{{ rider.strike_count }}">+Strike</button>
+            {% if rider.is_banned %}
+            <form method="post" action="{% url 'dashboard:unban_user' rider.pk %}">
+              {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button type="submit" class="btn btn-tw-green" style="padding:3px 10px;font-size:11px;">Unban</button>
+            </form>
+            {% else %}
+            <button class="btn btn-tw-red" style="padding:3px 10px;font-size:11px;"
+              data-bs-toggle="modal" data-bs-target="#banModal"
+              data-url="{% url 'dashboard:ban_user' rider.pk %}"
+              data-name="{{ rider.full_name }}">Ban</button>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-center py-5" style="color:var(--tw-muted);">No riders found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{# Pagination #}
+{% if page_obj.has_other_pages %}
+<nav class="mt-3 d-flex justify-content-center">
+  <ul class="pagination pagination-sm">
+    {% if page_obj.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&status={{ status }}" style="border-radius:0;">‹</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link" style="border-radius:0;">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&status={{ status }}" style="border-radius:0;">›</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

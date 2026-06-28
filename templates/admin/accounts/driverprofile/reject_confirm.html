@@ -1,0 +1,24 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<div style="max-width:600px;margin:24px auto;">
+  <h2>Reject Driver: {{ profile.user.full_name }}</h2>
+  <p style="color:#666;">Phone: {{ profile.user.phone_number }}</p>
+  <form method="post">
+    {% csrf_token %}
+    <p>
+      <label><strong>Rejection reason (optional)</strong></label><br>
+      <textarea name="rejection_reason" rows="4" cols="60"
+        placeholder="e.g. Document photo is unclear, please resubmit."></textarea>
+    </p>
+    <p>
+      <button type="submit"
+        style="background:#c62828;color:#fff;border:none;padding:8px 20px;border-radius:4px;cursor:pointer;font-size:14px;">
+        Confirm Rejection
+      </button>
+      &nbsp;
+      <a href="{% url 'admin:accounts_driverprofile_change' profile.pk %}"
+        style="padding:8px 16px;background:#eee;border-radius:4px;text-decoration:none;color:#333;">Cancel</a>
+    </p>
+  </form>
+</div>
+{% endblock %}

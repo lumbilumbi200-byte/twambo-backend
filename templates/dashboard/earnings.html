@@ -1,0 +1,125 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Earnings — TWAMBO Dashboard{% endblock %}
+{% block topbar_title %}Earnings &amp; Commission{% endblock %}
+
+{% block content %}
+
+{# ── KPI row ── #}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card yellow">
+      <div class="stat-val">K{{ total_today|floatformat:2 }}</div>
+      <div class="stat-lbl">Today</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-val">K{{ total_week|floatformat:2 }}</div>
+      <div class="stat-lbl">This Week</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card green">
+      <div class="stat-val">K{{ total_month|floatformat:2 }}</div>
+      <div class="stat-lbl">This Month</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="border-left-color:#333;">
+      <div class="stat-val">K{{ total_all|floatformat:2 }}</div>
+      <div class="stat-lbl">All Time</div>
+    </div>
+  </div>
+</div>
+
+{# ── Chart + Top drivers ── #}
+<div class="row g-4 mb-4">
+  <div class="col-lg-8">
+    <div class="section-label">Monthly Commission — Last 6 Months</div>
+    <div class="bg-white p-4">
+      <canvas id="earningsChart" height="80"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="section-label">Top Drivers by Commission</div>
+    <div class="bg-white">
+      <table class="table tw-table mb-0">
+        <thead><tr><th>Driver</th><th>Trips</th><th>Total</th></tr></thead>
+        <tbody>
+          {% for d in top_drivers %}
+          <tr>
+            <td>
+              <a class="row-link" href="{% url 'dashboard:driver_detail' d.driver__pk %}">
+                <div class="page-user-name">{{ d.driver__full_name }}</div>
+                <div class="page-user-phone">{{ d.driver__phone_number }}</div>
+              </a>
+            </td>
+            <td style="font-size:12px;">{{ d.trips }}</td>
+            <td style="font-size:13px;font-weight:700;color:var(--tw-green);">K{{ d.total|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center py-4" style="color:var(--tw-muted);">No data yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{# ── Recent commissions ── #}
+<div class="section-label">Recent Commission Records</div>
+<div class="bg-white">
+  <table class="table tw-table mb-0">
+    <thead><tr><th>Driver</th><th>Route</th><th>Trip Revenue</th><th>Rate</th><th>Commission</th><th>Status</th><th>Date</th></tr></thead>
+    <tbody>
+      {% for c in recent %}
+      <tr>
+        <td>
+          <a class="row-link" href="{% url 'dashboard:driver_detail' c.driver.pk %}">
+            <div class="page-user-name">{{ c.driver.full_name }}</div>
+          </a>
+        </td>
+        <td style="font-size:11px;color:var(--tw-muted);">{{ c.trip.origin_name|truncatechars:16 }} → {{ c.trip.destination_name|truncatechars:16 }}</td>
+        <td style="font-size:12px;">K{{ c.trip_revenue }}</td>
+        <td style="font-size:11px;color:var(--tw-muted);">{{ c.rate|floatformat:1 }}%</td>
+        <td style="font-size:13px;font-weight:700;color:var(--tw-green);">K{{ c.amount }}</td>
+        <td><span class="badge-status {% if c.status == 'deducted' %}badge-approved{% else %}badge-pending{% endif %}">{{ c.status|upper }}</span></td>
+        <td style="font-size:11px;color:var(--tw-muted);">{{ c.created_at|date:"d M Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-center py-5" style="color:var(--tw-muted);">No commission records yet</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script>
+  const ctx = document.getElementById('earningsChart');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: {{ chart_labels|safe }},
+      datasets: [{
+        label: 'Commission (K)',
+        data: {{ chart_data|safe }},
+        backgroundColor: '#FFC300',
+        borderColor: '#E6A800',
+        borderWidth: 1,
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f0f0f0' }, ticks: { callback: v => 'K' + v } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+</script>
+{% endblock %}

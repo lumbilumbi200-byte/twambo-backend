@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}TWAMBO Dashboard{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --tw-yellow: #FFC300;
+      --tw-blue:   #1565C0;
+      --tw-cream:  #FFFBF0;
+      --tw-line:   #E8D5A3;
+      --tw-text:   #1A1A1A;
+      --tw-muted:  #6B6B6B;
+      --tw-green:  #2E7D32;
+      --tw-red:    #C62828;
+      --tw-orange: #E65100;
+      --sidebar-w: 230px;
+    }
+
+    body { background: #F5F5F0; font-family: 'Segoe UI', sans-serif; color: var(--tw-text); }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: #111;
+      position: fixed;
+      top: 0; left: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+    .sidebar-brand {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .sidebar-brand span.tw {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: var(--tw-yellow);
+    }
+    .sidebar-brand span.sub {
+      font-size: 9px;
+      color: #888;
+      letter-spacing: 1.5px;
+      display: block;
+      margin-top: 2px;
+    }
+    .sidebar-nav { padding: 12px 0; flex: 1; }
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      color: #aaa;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+      transition: all .15s;
+    }
+    .nav-item a:hover { color: #fff; background: #1a1a1a; }
+    .nav-item a.active { color: var(--tw-yellow); border-left-color: var(--tw-yellow); background: #1a1a1a; }
+    .nav-item a i { font-size: 15px; width: 18px; text-align: center; }
+    .sidebar-footer {
+      padding: 14px 20px;
+      border-top: 1px solid #2a2a2a;
+      font-size: 11px;
+      color: #555;
+    }
+
+    /* ── Main ── */
+    #main { margin-left: var(--sidebar-w); }
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 12px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar h1 { font-size: 16px; font-weight: 800; letter-spacing: .5px; margin: 0; }
+    .content { padding: 28px; }
+
+    /* ── Cards ── */
+    .stat-card {
+      background: #fff;
+      border-left: 4px solid var(--tw-blue);
+      padding: 18px 20px;
+      border-radius: 0;
+    }
+    .stat-card.yellow { border-left-color: var(--tw-yellow); }
+    .stat-card.green  { border-left-color: var(--tw-green); }
+    .stat-card.red    { border-left-color: var(--tw-red); }
+    .stat-card.orange { border-left-color: var(--tw-orange); }
+    .stat-val  { font-size: 34px; font-weight: 900; line-height: 1; }
+    .stat-lbl  { font-size: 10px; font-weight: 700; color: var(--tw-muted); letter-spacing: 1.3px; text-transform: uppercase; margin-top: 5px; }
+
+    /* ── Tables ── */
+    .tw-table { background: #fff; border: none; }
+    .tw-table th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--tw-muted); border-bottom: 2px solid var(--tw-line); }
+    .tw-table td { font-size: 13px; vertical-align: middle; border-color: #f0f0f0; }
+    .tw-table tbody tr:hover td { background: var(--tw-cream); }
+
+    /* ── Badges ── */
+    .badge-status { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 2px; letter-spacing: .5px; }
+    .badge-approved  { background: #e8f5e9; color: var(--tw-green); }
+    .badge-pending   { background: #fff8e1; color: #F57C00; }
+    .badge-rejected  { background: #ffebee; color: var(--tw-red); }
+    .badge-banned    { background: var(--tw-red); color: #fff; }
+    .badge-active    { background: #e3f2fd; color: var(--tw-blue); }
+    .badge-completed { background: #f3f3f3; color: #555; }
+    .badge-cancelled { background: #ffebee; color: var(--tw-red); }
+    .badge-scheduled { background: #fffde7; color: #F57C00; }
+
+    /* ── Strike dots ── */
+    .strike-dots span {
+      display: inline-block;
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      margin: 0 1px;
+    }
+    .dot-filled { background: var(--tw-red); }
+    .dot-empty  { background: #ddd; }
+
+    /* ── Misc ── */
+    .section-label { font-size: 10px; font-weight: 800; color: var(--tw-muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
+    .btn-tw-yellow { background: var(--tw-yellow); color: var(--tw-text); font-weight: 700; font-size: 12px; border: none; border-radius: 0; padding: 6px 14px; }
+    .btn-tw-yellow:hover { background: #e6af00; color: var(--tw-text); }
+    .btn-tw-blue   { background: var(--tw-blue); color: #fff; font-weight: 700; font-size: 12px; border: none; border-radius: 0; padding: 6px 14px; }
+    .btn-tw-red    { background: var(--tw-red); color: #fff; font-weight: 700; font-size: 12px; border: none; border-radius: 0; padding: 6px 14px; }
+    .btn-tw-green  { background: var(--tw-green); color: #fff; font-weight: 700; font-size: 12px; border: none; border-radius: 0; padding: 6px 14px; }
+    .search-box { border-radius: 0; border: 1px solid var(--tw-line); font-size: 13px; }
+    .filter-bar { background: #fff; padding: 14px 20px; border-bottom: 1px solid #eee; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .page-user-name { font-weight: 700; }
+    .page-user-phone { font-size: 11px; color: var(--tw-muted); }
+    a.row-link { color: inherit; text-decoration: none; }
+    a.row-link:hover { color: var(--tw-blue); }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="sidebar-brand">
+    <span class="tw">TWAMBO</span>
+    <span class="sub">ADMIN DASHBOARD</span>
+  </div>
+  <nav class="sidebar-nav">
+    <ul class="nav-item list-unstyled mb-0">
+      <li><a href="{% url 'dashboard:home' %}" class="{% if page == 'home' %}active{% endif %}">
+        <i class="bi bi-grid-1x2-fill"></i> Overview
+      </a></li>
+      <li><a href="{% url 'dashboard:riders' %}" class="{% if page == 'riders' %}active{% endif %}">
+        <i class="bi bi-person-fill"></i> Riders
+      </a></li>
+      <li><a href="{% url 'dashboard:drivers' %}" class="{% if page == 'drivers' %}active{% endif %}">
+        <i class="bi bi-car-front-fill"></i> Drivers
+      </a></li>
+      <li><a href="{% url 'dashboard:strikes' %}" class="{% if page == 'strikes' %}active{% endif %}">
+        <i class="bi bi-exclamation-triangle-fill"></i> Strikes
+      </a></li>
+      <li><a href="{% url 'dashboard:trips' %}" class="{% if page == 'trips' %}active{% endif %}">
+        <i class="bi bi-map-fill"></i> Trips
+      </a></li>
+      <li><a href="{% url 'dashboard:earnings' %}" class="{% if page == 'earnings' %}active{% endif %}">
+        <i class="bi bi-cash-coin"></i> Earnings
+      </a></li>
+      <li><a href="{% url 'dashboard:float_codes' %}" class="{% if page == 'float_codes' %}active{% endif %}">
+        <i class="bi bi-ticket-perforated-fill"></i> Float Codes
+      </a></li>
+      <li><a href="{% url 'dashboard:slides' %}" class="{% if page == 'slides' %}active{% endif %}">
+        <i class="bi bi-images"></i> Slides
+      </a></li>
+    </ul>
+  </nav>
+  <div class="sidebar-footer">
+    <div>{{ request.user.full_name }}</div>
+    <a href="{% url 'dashboard:logout' %}" style="color:#555;text-decoration:none;font-size:11px;">
+      <i class="bi bi-box-arrow-left"></i> Sign out
+    </a>
+  </div>
+</div>
+
+<div id="main">
+  <div class="topbar">
+    <h1>{% block topbar_title %}Dashboard{% endblock %}</h1>
+    <div class="ms-auto d-flex gap-2">
+      {% for m in messages %}
+      <div class="alert alert-{% if m.tags == 'error' %}danger{% elif m.tags == 'warning' %}warning{% else %}success{% endif %} py-1 px-3 mb-0" style="font-size:12px;border-radius:0;">
+        {{ m }}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<!-- Strike modal (shared) -->
+<div class="modal fade" id="strikeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:0;border-left:4px solid var(--tw-orange);">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" style="font-size:14px;letter-spacing:.5px;">GIVE STRIKE</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" id="strikeForm">
+        {% csrf_token %}
+        <input type="hidden" name="next" id="strikeNext">
+        <div class="modal-body">
+          <p class="mb-3" style="font-size:13px;">
+            User: <strong id="strikeUserName"></strong>
+            &mdash; current strikes: <strong id="strikeCount"></strong>/5
+          </p>
+          <label class="section-label mb-1">Reason</label>
+          <select name="reason" class="form-select search-box mb-3">
+            {% for val, label in strike_reasons %}
+            <option value="{{ val }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+          <label class="section-label mb-1">Notes</label>
+          <textarea name="notes" class="form-control search-box" rows="3" placeholder="Describe the incident…"></textarea>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="submit" class="btn btn-tw-yellow">Add Strike</button>
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="font-size:12px;border-radius:0;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Ban confirm modal -->
+<div class="modal fade" id="banModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content" style="border-radius:0;border-left:4px solid var(--tw-red);">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" style="font-size:14px;">BAN USER</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" id="banForm">
+        {% csrf_token %}
+        <input type="hidden" name="next" id="banNext">
+        <div class="modal-body">
+          <p style="font-size:13px;">Ban <strong id="banUserName"></strong>? They will not be able to use the app.</p>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="submit" class="btn btn-tw-red">Ban</button>
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="font-size:12px;border-radius:0;">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Strike modal wiring
+  document.getElementById('strikeModal').addEventListener('show.bs.modal', function(e) {
+    const btn = e.relatedTarget;
+    document.getElementById('strikeForm').action = btn.dataset.url;
+    document.getElementById('strikeUserName').textContent = btn.dataset.name;
+    document.getElementById('strikeCount').textContent = btn.dataset.strikes;
+    document.getElementById('strikeNext').value = window.location.pathname + window.location.search;
+  });
+  // Ban modal wiring
+  document.getElementById('banModal').addEventListener('show.bs.modal', function(e) {
+    const btn = e.relatedTarget;
+    document.getElementById('banForm').action = btn.dataset.url;
+    document.getElementById('banUserName').textContent = btn.dataset.name;
+    document.getElementById('banNext').value = window.location.pathname + window.location.search;
+  });
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

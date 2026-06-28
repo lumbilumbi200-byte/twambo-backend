@@ -1,0 +1,65 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Marketing Slides — TWAMBO Dashboard{% endblock %}
+{% block topbar_title %}Marketing Slides{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <p style="font-size:13px;color:var(--tw-muted);margin:0;">These slides appear in the app's home screen hero carousel.</p>
+  <a href="{% url 'dashboard:slide_new' %}" class="btn btn-tw-yellow"><i class="bi bi-plus-lg me-1"></i> New Slide</a>
+</div>
+
+<div class="row g-3">
+  {% for slide in slides %}
+  <div class="col-md-4 col-lg-3">
+    <div style="border-left:4px solid {{ slide.bg_color }};background:#fff;padding:0;">
+
+      {# Preview card #}
+      <div style="background:{{ slide.bg_color }};padding:20px 16px;position:relative;overflow:hidden;min-height:110px;">
+        <div style="position:absolute;top:-14px;right:-14px;width:60px;height:60px;border-radius:50%;background:{{ slide.accent_color }};opacity:.5;"></div>
+        <div style="position:absolute;bottom:-18px;left:-8px;width:44px;height:44px;border-radius:50%;background:{{ slide.accent_color }};opacity:.3;"></div>
+        <div style="font-size:9px;font-weight:800;letter-spacing:1.5px;color:{{ slide.text_color }};opacity:.65;">{{ slide.label }}</div>
+        <div style="margin-top:6px;font-size:14px;font-weight:800;color:{{ slide.text_color }};line-height:1.25;">{{ slide.tagline|linebreaksbr }}</div>
+        <div style="position:absolute;bottom:12px;right:14px;font-size:10px;color:{{ slide.text_color }};opacity:.5;font-weight:700;">{{ slide.icon_key|upper }}</div>
+      </div>
+
+      {# Meta + actions #}
+      <div style="padding:10px 14px;">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span style="font-size:10px;font-weight:700;color:var(--tw-muted);">ORDER {{ slide.order }}</span>
+          {% if slide.is_active %}
+            <span class="badge-status badge-approved">ACTIVE</span>
+          {% else %}
+            <span class="badge-status badge-cancelled">HIDDEN</span>
+          {% endif %}
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{% url 'dashboard:slide_edit' slide.pk %}" class="btn btn-tw-blue btn-sm" style="font-size:11px;padding:3px 10px;">Edit</a>
+          <form method="post" action="{% url 'dashboard:slide_toggle' slide.pk %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-light btn-sm" style="font-size:11px;padding:3px 10px;border-radius:0;">
+              {% if slide.is_active %}Hide{% else %}Show{% endif %}
+            </button>
+          </form>
+          <form method="post" action="{% url 'dashboard:slide_delete' slide.pk %}" class="d-inline" onsubmit="return confirm('Delete this slide?')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-link btn-sm text-danger p-0" style="font-size:11px;">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="bg-white p-5 text-center" style="color:var(--tw-muted);font-size:13px;">
+      No slides yet. <a href="{% url 'dashboard:slide_new' %}">Create the first one.</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="mt-4 p-3 bg-white" style="border-left:4px solid #ddd;font-size:12px;color:var(--tw-muted);">
+  <strong>Public API:</strong> <code>GET /api/v1/slides/</code> — returns active slides ordered by <code>order</code> field. The Flutter app reads this endpoint.
+</div>
+
+{% endblock %}
