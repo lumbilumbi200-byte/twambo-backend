@@ -112,6 +112,11 @@
               data-url="{% url 'dashboard:ban_user' driver.pk %}"
               data-name="{{ driver.full_name }}">Ban</button>
             {% endif %}
+            <button class="btn btn-secondary" style="padding:3px 10px;font-size:11px;"
+              data-bs-toggle="modal" data-bs-target="#deleteModal"
+              data-url="{% url 'dashboard:delete_user' driver.pk %}"
+              data-name="{{ driver.full_name }}"
+              data-phone="{{ driver.phone_number }}">Delete</button>
           </div>
         </td>
       </tr>
@@ -135,5 +140,42 @@
   </ul>
 </nav>
 {% endif %}
+
+<!-- Delete confirmation modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:0;border-top:4px solid #c62828;">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold">Delete Driver Account</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>You are about to permanently delete the account for:</p>
+        <p><strong id="delete-name"></strong> &mdash; <span id="delete-phone" style="color:#555;"></span></p>
+        <div style="background:#fff3e0;border-left:3px solid #e65100;padding:10px 14px;font-size:13px;">
+          This removes their vehicle, trips, documents and all history.<br>
+          Their phone number will be <strong style="color:#2e7d32;">freed for re-registration</strong>.
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <form id="delete-form" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" class="btn btn-danger" style="border-radius:0;">Yes, Delete Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('deleteModal').addEventListener('show.bs.modal', function(e) {
+  var btn = e.relatedTarget;
+  document.getElementById('delete-name').textContent  = btn.dataset.name;
+  document.getElementById('delete-phone').textContent = btn.dataset.phone;
+  document.getElementById('delete-form').action       = btn.dataset.url;
+});
+</script>
 
 {% endblock %}
