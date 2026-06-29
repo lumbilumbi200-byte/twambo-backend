@@ -48,7 +48,11 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         from decimal import Decimal
         data['detour_km'] = detour_km
         data['detour_fee'] = detour_fee
-        base_fare = trip.current_shared_fare + Decimal(str(detour_fee))
+        # Private trips have a locked fare — never divide by seat count.
+        if trip.mode == Trip.MODE_PRIVATE:
+            base_fare = trip.private_fare + Decimal(str(detour_fee))
+        else:
+            base_fare = trip.current_shared_fare + Decimal(str(detour_fee))
         surcharge = rider.fare_surcharge_pct
         if surcharge > 0:
             base_fare = base_fare * (1 + Decimal(str(surcharge)) / 100)

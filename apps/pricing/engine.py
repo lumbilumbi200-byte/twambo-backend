@@ -8,6 +8,7 @@ class FareEngine:
     PRIVATE_MULTIPLIER = settings.TWAMBO_PRIVATE_MULTIPLIER
     DETOUR_RATE = settings.TWAMBO_DETOUR_RATE_PER_KM
     MIN_FARE = settings.TWAMBO_MIN_FARE
+    MIN_PRIVATE_FARE = settings.TWAMBO_MIN_PRIVATE_FARE
 
     @classmethod
     def _surge_multiplier(cls):
@@ -28,6 +29,7 @@ class FareEngine:
 
         if is_private:
             fare = fare * Decimal(str(cls.PRIVATE_MULTIPLIER))
+            return max(fare, Decimal(str(cls.MIN_PRIVATE_FARE))).quantize(Decimal('0.01'))
 
         return max(fare, Decimal(str(cls.MIN_FARE))).quantize(Decimal('0.01'))
 

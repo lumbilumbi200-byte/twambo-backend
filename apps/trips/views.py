@@ -30,11 +30,15 @@ def _finalize_trip(trip):
         trip=trip, status=Booking.STATUS_CONFIRMED
     ).select_related('rider')
 
-    final_fare = trip.current_shared_fare
+    shared_final_fare = trip.current_shared_fare
     total_revenue = Decimal('0')
 
     for booking in bookings:
-        booking.complete(final_fare=final_fare + booking.detour_fee)
+        # Private trips lock fare at booking; shared trips settle at final seat count.
+        final_fare = (booking.fare_at_booking
+                      if trip.mode == Trip.MODE_PRIVATE
+                      else shared_final_fare + booking.detour_fee)
+        booking.complete(final_fare=final_fare)
         total_revenue += booking.fare_final or Decimal('0')
         # Bump rider stats
         try:
@@ -365,7 +369,7 @@ def accept_ride_request(request, pk, request_pk):
             dropoff_lng=ride_req.destination_lng,
             detour_km=Decimal('0'),
             detour_fee=Decimal('0'),
-            fare_at_booking=trip.current_shared_fare,
+            fare_at_booking=trip.private_fare if trip.mode == Trip.MODE_PRIVATE else trip.current_shared_fare,
             status=Booking.STATUS_CONFIRMED,
         )
         trip.available_seats -= 1
@@ -476,7 +480,7 @@ def accept_broadcast_request(request, pk):
             dropoff_lng=ride_req.destination_lng,
             detour_km=Decimal('0'),
             detour_fee=Decimal('0'),
-            fare_at_booking=trip.current_shared_fare,
+            fare_at_booking=trip.private_fare if trip.mode == Trip.MODE_PRIVATE else trip.current_shared_fare,
             status=Booking.STATUS_CONFIRMED,
         )
         trip.available_seats -= 1
