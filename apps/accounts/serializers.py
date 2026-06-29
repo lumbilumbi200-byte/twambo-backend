@@ -113,7 +113,8 @@ class DriverFinancePrefsSerializer(serializers.ModelSerializer):
 class DriverDocumentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DriverProfile
-        fields = ['national_id', 'drivers_license', 'vehicle_registration']
+        fields = ['national_id', 'drivers_license', 'vehicle_registration',
+                  'fitness_certificate', 'insurance_certificate', 'plate_photo']
 
 
 class RiderProfileSerializer(serializers.ModelSerializer):

@@ -263,6 +263,7 @@ class DriverProfileAdmin(admin.ModelAdmin):
     readonly_fields = [
         'driver_name', 'phone_number', 'created_at',
         'national_id_preview', 'drivers_license_preview', 'vehicle_registration_preview',
+        'fitness_certificate_preview', 'insurance_certificate_preview', 'plate_photo_preview',
         'approval_actions',
     ]
     fieldsets = (
@@ -273,7 +274,8 @@ class DriverProfileAdmin(admin.ModelAdmin):
             'fields': ('verification_status', 'rejection_reason'),
         }),
         ('Documents', {
-            'fields': ('national_id_preview', 'drivers_license_preview', 'vehicle_registration_preview'),
+            'fields': ('national_id_preview', 'drivers_license_preview', 'vehicle_registration_preview',
+                       'fitness_certificate_preview', 'insurance_certificate_preview', 'plate_photo_preview'),
             'classes': ('wide',),
         }),
         ('Actions', {'fields': ('approval_actions',)}),
@@ -336,6 +338,18 @@ class DriverProfileAdmin(admin.ModelAdmin):
     @admin.display(description='Vehicle Registration')
     def vehicle_registration_preview(self, obj):
         return _doc_img(obj.vehicle_registration, 'Vehicle Registration')
+
+    @admin.display(description='Fitness Certificate')
+    def fitness_certificate_preview(self, obj):
+        return _doc_img(obj.fitness_certificate, 'Fitness Certificate')
+
+    @admin.display(description='Insurance Certificate')
+    def insurance_certificate_preview(self, obj):
+        return _doc_img(obj.insurance_certificate, 'Insurance Certificate')
+
+    @admin.display(description='Number Plate Photo')
+    def plate_photo_preview(self, obj):
+        return _doc_img(obj.plate_photo, 'Number Plate')
 
     @admin.display(description='Quick Actions')
     def approval_actions(self, obj):

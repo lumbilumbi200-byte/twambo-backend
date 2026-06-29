@@ -151,9 +151,12 @@ class DriverProfile(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='driver_profile')
-    national_id = models.ImageField(upload_to='documents/')
-    drivers_license = models.ImageField(upload_to='documents/')
-    vehicle_registration = models.ImageField(upload_to='documents/')
+    national_id = models.ImageField(upload_to='documents/', blank=True, null=True)
+    drivers_license = models.ImageField(upload_to='documents/', blank=True, null=True)
+    vehicle_registration = models.ImageField(upload_to='documents/', blank=True, null=True)
+    fitness_certificate = models.ImageField(upload_to='documents/', blank=True, null=True)
+    insurance_certificate = models.ImageField(upload_to='documents/', blank=True, null=True)
+    plate_photo = models.ImageField(upload_to='documents/', blank=True, null=True)
     verification_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_PENDING)
     rejection_reason = models.TextField(blank=True)
     is_online = models.BooleanField(default=False)

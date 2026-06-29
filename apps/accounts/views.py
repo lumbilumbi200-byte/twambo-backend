@@ -65,7 +65,7 @@ class DriverDocumentsView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         instance = serializer.save()
         instance.verification_status = instance.STATUS_PENDING
-        instance.save(update_fields=['verification_status', 'updated_at'])
+        instance.save(update_fields=['verification_status'])
 
 
 class DriverOnlineToggleView(generics.GenericAPIView):
