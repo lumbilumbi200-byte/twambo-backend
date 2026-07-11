@@ -4,9 +4,53 @@
 
 {% block content %}
 
+<style>
+  .type-tabs { display:flex; gap:0; margin-bottom:16px; border-bottom:2px solid var(--tw-line); }
+  .type-tab  { padding:8px 22px; font-size:11px; font-weight:700; letter-spacing:1px;
+               text-transform:uppercase; cursor:pointer; border:none; background:none;
+               color:var(--tw-muted); border-bottom:2px solid transparent; margin-bottom:-2px;
+               text-decoration:none; }
+  .type-tab.active { color:var(--tw-blue); border-bottom-color:var(--tw-blue); }
+  .type-tab:hover:not(.active) { color:var(--tw-text); }
+
+  .badge-city { background:#e3f2fd; color:var(--tw-blue); font-size:10px; font-weight:700;
+                padding:2px 7px; border-radius:2px; letter-spacing:.5px; }
+  .badge-hike { background:#fff8e1; color:#E65100; font-size:10px; font-weight:700;
+                padding:2px 7px; border-radius:2px; letter-spacing:.5px; }
+
+  /* Map panel */
+  #map-panel { border-top:2px solid var(--tw-line); margin-top:20px; }
+  #map-toggle { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+                cursor:pointer; background:none; border:none; color:var(--tw-blue);
+                padding:10px 0; display:flex; align-items:center; gap:6px; }
+  #map-toggle svg { transition:transform .2s; }
+  #map-toggle.open svg { transform:rotate(180deg); }
+  #trip-map { height:420px; width:100%; display:none; }
+  #trip-map.visible { display:block; }
+</style>
+
+<!-- ── Type Tabs ── -->
+<div class="type-tabs">
+  <a class="type-tab {% if not trip_type %}active{% endif %}"
+     href="?{% if q %}q={{ q }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}">
+    All
+  </a>
+  <a class="type-tab {% if trip_type == 'city' %}active{% endif %}"
+     href="?trip_type=city{% if q %}&q={{ q }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+    City
+  </a>
+  <a class="type-tab {% if trip_type == 'hike' %}active{% endif %}"
+     href="?trip_type=hike{% if q %}&q={{ q }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+    Hike / Long Distance
+  </a>
+</div>
+
+<!-- ── Filter Bar ── -->
 <div class="filter-bar mb-4">
   <form method="get" class="d-flex gap-2 align-items-center flex-wrap w-100">
-    <input type="text" name="q" value="{{ q }}" class="form-control search-box" style="max-width:240px;" placeholder="Search driver or route…">
+    {% if trip_type %}<input type="hidden" name="trip_type" value="{{ trip_type }}">{% endif %}
+    <input type="text" name="q" value="{{ q }}" class="form-control search-box"
+           style="max-width:240px;" placeholder="Search driver or route…">
     <select name="status" class="form-select search-box" style="max-width:160px;">
       <option value="" {% if not status_filter %}selected{% endif %}>All statuses</option>
       <option value="scheduled"  {% if status_filter == 'scheduled' %}selected{% endif %}>Scheduled</option>
@@ -15,15 +59,27 @@
       <option value="cancelled"  {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
     </select>
     <button type="submit" class="btn btn-tw-blue">Filter</button>
-    {% if q or status_filter %}<a href="{% url 'dashboard:trips' %}" class="btn btn-light" style="font-size:12px;border-radius:0;">Clear</a>{% endif %}
-    <span class="ms-auto" style="font-size:12px;color:var(--tw-muted);">{{ page_obj.paginator.count }} trip{{ page_obj.paginator.count|pluralize }}</span>
+    {% if q or status_filter %}
+      <a href="?{% if trip_type %}trip_type={{ trip_type }}{% endif %}" class="btn btn-light"
+         style="font-size:12px;border-radius:0;">Clear</a>
+    {% endif %}
+    <span class="ms-auto" style="font-size:12px;color:var(--tw-muted);">
+      {{ page_obj.paginator.count }} trip{{ page_obj.paginator.count|pluralize }}
+    </span>
   </form>
 </div>
 
+<!-- ── Table ── -->
 <div class="bg-white">
   <table class="table tw-table mb-0">
     <thead><tr>
-      <th>Driver</th><th>Route</th><th>Departure</th><th>Mode</th><th>Status</th><th>Seats</th>
+      <th>Driver</th>
+      <th>Route</th>
+      <th>Departure</th>
+      <th>Type</th>
+      <th>Mode</th>
+      <th>Status</th>
+      <th>Seats</th>
     </tr></thead>
     <tbody>
       {% for trip in page_obj %}
@@ -34,31 +90,130 @@
             <div class="page-user-phone">{{ trip.driver.phone_number }}</div>
           </a>
         </td>
-        <td style="font-size:12px;">{{ trip.origin_name|truncatechars:22 }}<br>→ {{ trip.destination_name|truncatechars:22 }}</td>
-        <td style="font-size:11px;color:var(--tw-muted);">{{ trip.departure_time|date:"d M Y" }}<br>{{ trip.departure_time|date:"H:i" }}</td>
+        <td style="font-size:12px;">
+          {{ trip.origin_name|truncatechars:24 }}<br>
+          <span style="color:var(--tw-muted);">→ {{ trip.destination_name|truncatechars:24 }}</span>
+        </td>
+        <td style="font-size:11px;color:var(--tw-muted);">
+          {{ trip.departure_time|date:"d M Y" }}<br>{{ trip.departure_time|date:"H:i" }}
+        </td>
+        <td>
+          {% if trip.trip_type == 'hike' %}
+            <span class="badge-hike">HIKE</span>
+          {% else %}
+            <span class="badge-city">CITY</span>
+          {% endif %}
+        </td>
         <td><span style="font-size:11px;font-weight:600;color:var(--tw-muted);">{{ trip.mode|upper }}</span></td>
         <td><span class="badge-status badge-{{ trip.status }}">{{ trip.status|upper }}</span></td>
         <td style="font-size:12px;">{{ trip.available_seats }}/{{ trip.total_seats }} left</td>
       </tr>
       {% empty %}
-      <tr><td colspan="6" class="text-center py-5" style="color:var(--tw-muted);">No trips found</td></tr>
+      <tr><td colspan="7" class="text-center py-5" style="color:var(--tw-muted);">No trips found</td></tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
 
+<!-- ── Pagination ── -->
 {% if page_obj.has_other_pages %}
 <nav class="mt-3 d-flex justify-content-center">
   <ul class="pagination pagination-sm">
     {% if page_obj.has_previous %}
-    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&status={{ status_filter }}" style="border-radius:0;">‹</a></li>
+    <li class="page-item">
+      <a class="page-link"
+         href="?page={{ page_obj.previous_page_number }}&q={{ q }}&status={{ status_filter }}&trip_type={{ trip_type }}"
+         style="border-radius:0;">‹</a>
+    </li>
     {% endif %}
-    <li class="page-item disabled"><span class="page-link" style="border-radius:0;">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+    <li class="page-item disabled">
+      <span class="page-link" style="border-radius:0;">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    </li>
     {% if page_obj.has_next %}
-    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&status={{ status_filter }}" style="border-radius:0;">›</a></li>
+    <li class="page-item">
+      <a class="page-link"
+         href="?page={{ page_obj.next_page_number }}&q={{ q }}&status={{ status_filter }}&trip_type={{ trip_type }}"
+         style="border-radius:0;">›</a>
+    </li>
     {% endif %}
   </ul>
 </nav>
 {% endif %}
+
+<!-- ── Map Panel ── -->
+<div id="map-panel">
+  <button id="map-toggle" onclick="toggleMap()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+    Show Map
+  </button>
+  <div id="trip-map"></div>
+</div>
+
+<!-- Leaflet (CDN — requires internet; self-host if deploying offline) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  const TRIPS = {{ map_trips_json|safe }};
+  let map = null;
+
+  const STATUS_COLOR = {
+    active:    '#1565C0',
+    scheduled: '#F57C00',
+    completed: '#555',
+    cancelled: '#C62828',
+  };
+  const TYPE_ORIGIN_COLOR = {
+    city: '#1565C0',
+    hike: '#E65100',
+  };
+
+  function buildMap() {
+    if (map) return;
+    // Centre on Zambia
+    map = L.map('trip-map').setView([-13.5, 28.5], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 18,
+    }).addTo(map);
+
+    TRIPS.forEach(t => {
+      const col = STATUS_COLOR[t.status] || '#888';
+      const oCol = TYPE_ORIGIN_COLOR[t.type] || '#1565C0';
+
+      // Origin marker
+      L.circleMarker([t.oLat, t.oLng], {
+        radius: 5, color: oCol, fillColor: oCol, fillOpacity: 1, weight: 1,
+      }).bindTooltip(`<b>${t.o}</b><br>→ ${t.d}<br>${t.type.toUpperCase()} · ${t.status}`,
+                     {direction:'top', sticky:true}).addTo(map);
+
+      // Destination marker
+      L.circleMarker([t.dLat, t.dLng], {
+        radius: 4, color: col, fillColor: '#fff', fillOpacity: 1, weight: 2,
+      }).addTo(map);
+
+      // Route line
+      L.polyline([[t.oLat, t.oLng], [t.dLat, t.dLng]], {
+        color: col, weight: 1.5, opacity: 0.55, dashArray: t.type === 'hike' ? '6,4' : null,
+      }).addTo(map);
+    });
+  }
+
+  function toggleMap() {
+    const mapEl = document.getElementById('trip-map');
+    const btn   = document.getElementById('map-toggle');
+    const visible = mapEl.classList.toggle('visible');
+    btn.classList.toggle('open', visible);
+    btn.querySelector('span') && (btn.childNodes[1].textContent = visible ? ' Hide Map' : ' Show Map');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="6 9 12 15 18 9"></polyline></svg> ${visible ? 'Hide Map' : 'Show Map'}`;
+    if (visible) {
+      buildMap();
+      setTimeout(() => map && map.invalidateSize(), 50);
+    }
+  }
+</script>
 
 {% endblock %}

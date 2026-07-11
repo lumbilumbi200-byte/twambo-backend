@@ -328,7 +328,13 @@ def strikes_log(request):
 
 @staff_required
 def trips(request):
+    import json
+
     qs = Trip.objects.select_related('driver').order_by('-departure_time')
+
+    trip_type = request.GET.get('trip_type', '')
+    if trip_type in ('city', 'hike'):
+        qs = qs.filter(trip_type=trip_type)
 
     status_filter = request.GET.get('status', '')
     if status_filter:
@@ -345,11 +351,36 @@ def trips(request):
     paginator = Paginator(qs, 25)
     page_obj = paginator.get_page(request.GET.get('page'))
 
+    # Map data — first 300 filtered trips with coordinates for the Leaflet overlay
+    map_qs = qs.values(
+        'id', 'origin_name', 'destination_name',
+        'origin_lat', 'origin_lng',
+        'destination_lat', 'destination_lng',
+        'status', 'trip_type',
+    )[:300]
+
+    map_trips_json = json.dumps([
+        {
+            'id': str(t['id']),
+            'o': t['origin_name'],
+            'd': t['destination_name'],
+            'oLat': float(t['origin_lat']),
+            'oLng': float(t['origin_lng']),
+            'dLat': float(t['destination_lat']),
+            'dLng': float(t['destination_lng']),
+            'status': t['status'],
+            'type': t['trip_type'],
+        }
+        for t in map_qs
+    ])
+
     return render(request, 'dashboard/trips.html', {
         'page': 'trips',
         'page_obj': page_obj,
         'status_filter': status_filter,
+        'trip_type': trip_type,
         'q': q,
+        'map_trips_json': map_trips_json,
     })
 
 

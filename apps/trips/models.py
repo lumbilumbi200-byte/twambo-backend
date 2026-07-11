@@ -134,6 +134,13 @@ class Trip(models.Model):
         (MODE_DYNAMIC, 'Dynamic'),
     ]
 
+    TYPE_CITY = 'city'
+    TYPE_HIKE = 'hike'
+    TYPE_CHOICES = [
+        (TYPE_CITY, 'City'),
+        (TYPE_HIKE, 'Hike'),
+    ]
+
     driver = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='trips_as_driver'
     )
@@ -152,6 +159,7 @@ class Trip(models.Model):
     departure_time = models.DateTimeField(db_index=True)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default=STATUS_SCHEDULED, db_index=True)
     mode = models.CharField(max_length=10, choices=MODE_CHOICES, default=MODE_SHARED)
+    trip_type = models.CharField(max_length=10, choices=TYPE_CHOICES, default=TYPE_CITY, db_index=True)
 
     total_seats = models.PositiveSmallIntegerField()
     available_seats = models.PositiveSmallIntegerField()

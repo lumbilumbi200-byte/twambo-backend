@@ -43,7 +43,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
             float(data['pickup_lat']), float(data['pickup_lng']),
             pickup_radius_km=0.5,
         )
-        detour_fee = round(detour_km * FareEngine.DETOUR_RATE, 2)
+        detour_fee = FareEngine.calculate_detour_fee(detour_km, trip.trip_type)
 
         from decimal import Decimal
         data['detour_km'] = detour_km

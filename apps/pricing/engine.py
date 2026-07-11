@@ -7,6 +7,8 @@ class FareEngine:
     ZONE_BOUNDARIES_KM = settings.TWAMBO_ZONE_BOUNDARIES_KM
     PRIVATE_MULTIPLIER = settings.TWAMBO_PRIVATE_MULTIPLIER
     DETOUR_RATE = settings.TWAMBO_DETOUR_RATE_PER_KM
+    DETOUR_MAX_FEE_CITY = settings.TWAMBO_DETOUR_MAX_FEE_CITY
+    DETOUR_MAX_FEE_HIKE = settings.TWAMBO_DETOUR_MAX_FEE_HIKE
     MIN_FARE = settings.TWAMBO_MIN_FARE
     MIN_PRIVATE_FARE = settings.TWAMBO_MIN_PRIVATE_FARE
 
@@ -77,6 +79,12 @@ class FareEngine:
             return 0.0
         return round(distance_to_rider - pickup_radius_km, 3)
 
+    @classmethod
+    def calculate_detour_fee(cls, detour_km, trip_type='city'):
+        """Return the detour fee in ZMW, capped by trip type."""
+        cap = cls.DETOUR_MAX_FEE_HIKE if trip_type == 'hike' else cls.DETOUR_MAX_FEE_CITY
+        return min(round(detour_km * cls.DETOUR_RATE, 2), cap)
+
     @staticmethod
     def _haversine_km(lat1, lng1, lat2, lng2):
         import math
@@ -91,7 +99,8 @@ class FareEngine:
 
     @classmethod
     def fare_preview(cls, pickup_lat, pickup_lng, dropoff_lat, dropoff_lng,
-                     vehicle_multiplier=1.0, detour_km=0.0, total_seats=4):
+                     vehicle_multiplier=1.0, detour_km=0.0, total_seats=4,
+                     trip_type='city'):
         distance_km = cls._haversine_km(pickup_lat, pickup_lng, dropoff_lat, dropoff_lng)
         shared_fare = cls.calculate_fare(
             pickup_lat, pickup_lng, dropoff_lat, dropoff_lng,
@@ -105,10 +114,11 @@ class FareEngine:
             is_private=True,
             detour_km=detour_km,
         )
+        detour_fee = cls.calculate_detour_fee(detour_km, trip_type)
         return {
             'distance_km': round(distance_km, 2),
             'shared_fare': float(shared_fare),
             'private_fare': float(private_fare),
             'detour_km': detour_km,
-            'detour_fee': round(detour_km * cls.DETOUR_RATE, 2),
+            'detour_fee': detour_fee,
         }
