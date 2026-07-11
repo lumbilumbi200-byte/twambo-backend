@@ -12,7 +12,7 @@ class TripCreateSerializer(serializers.ModelSerializer):
         fields = [
             'origin_name', 'origin_lat', 'origin_lng',
             'destination_name', 'destination_lat', 'destination_lng',
-            'departure_time', 'mode', 'total_seats', 'minimum_riders',
+            'departure_time', 'mode', 'trip_type', 'total_seats', 'minimum_riders',
         ]
 
     def validate_departure_time(self, value):
@@ -38,6 +38,7 @@ class TripCreateSerializer(serializers.ModelSerializer):
             float(validated_data['destination_lat']),
             float(validated_data['destination_lng']),
             vehicle_multiplier=vehicle.price_multiplier,
+            trip_type=validated_data.get('trip_type', 'city'),
         )
 
         booking_window_closes_at = (
@@ -70,7 +71,7 @@ class TripListSerializer(serializers.ModelSerializer):
             'id', 'driver_id', 'driver_name', 'vehicle_type', 'vehicle_make_model',
             'origin_name', 'origin_lat', 'origin_lng',
             'destination_name', 'destination_lat', 'destination_lng',
-            'departure_time', 'status', 'mode',
+            'departure_time', 'status', 'mode', 'trip_type',
             'total_seats', 'available_seats', 'seats_taken',
             'current_shared_fare', 'private_fare',
             'booking_window_open', 'minimum_riders',
@@ -97,7 +98,7 @@ class TripDetailSerializer(serializers.ModelSerializer):
             'vehicle_type', 'vehicle_plate', 'vehicle_make_model',
             'origin_name', 'origin_lat', 'origin_lng',
             'destination_name', 'destination_lat', 'destination_lng',
-            'departure_time', 'status', 'mode',
+            'departure_time', 'status', 'mode', 'trip_type',
             'total_seats', 'available_seats', 'seats_taken', 'minimum_riders',
             'route_fare', 'current_shared_fare', 'private_fare',
             'booking_window_open', 'booking_window_closes_at',

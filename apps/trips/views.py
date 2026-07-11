@@ -213,7 +213,8 @@ class TripSearchView(generics.ListAPIView):
     Query params:
       origin        — partial match on origin_name
       destination   — partial match on destination_name
-      mode          — 'shared' | 'private' | 'hike'
+      mode          — 'shared' | 'private' | 'dynamic'
+      trip_type     — 'city' | 'hike'
       date          — YYYY-MM-DD  filter departure to that day
       min_seats     — integer, only trips with available_seats >= min_seats
     """
@@ -236,6 +237,8 @@ class TripSearchView(generics.ListAPIView):
             qs = qs.filter(destination_name__icontains=destination)
         if mode := params.get('mode'):
             qs = qs.filter(mode=mode)
+        if trip_type := params.get('trip_type'):
+            qs = qs.filter(trip_type=trip_type)
         if date_str := params.get('date'):
             try:
                 from datetime import date as _date
