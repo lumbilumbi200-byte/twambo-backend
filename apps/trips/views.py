@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.utils import timezone
 from django.conf import settings
+from datetime import timedelta
 from decimal import Decimal
 from django.db.models import Q
 from .models import Trip, RecurringTrip, RideRequest
@@ -225,7 +226,7 @@ class TripSearchView(generics.ListAPIView):
         qs = Trip.objects.filter(
             available_seats__gt=0,
         ).filter(
-            Q(status=Trip.STATUS_SCHEDULED, booking_window_open=True, departure_time__gte=now) |
+            Q(status=Trip.STATUS_SCHEDULED, booking_window_open=True, departure_time__gte=now - timedelta(hours=1)) |
             Q(status=Trip.STATUS_ACTIVE)
         ).select_related('driver', 'vehicle')
 
@@ -453,9 +454,43 @@ def accept_broadcast_request(request, pk):
     ).order_by('-created_at').first()
 
     if trip is None:
-        return Response(
-            {'detail': 'No active or scheduled trip available to assign this rider to.'},
-            status=status.HTTP_400_BAD_REQUEST,
+        # Auto-create an on-demand trip from the rider's origin to destination
+        from apps.accounts.models import Vehicle
+        from apps.pricing.engine import FareEngine
+        vehicle = Vehicle.objects.filter(driver=request.user).first()
+        if not vehicle:
+            return Response(
+                {'detail': 'Add your vehicle before accepting rides.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        route_fare = FareEngine.calculate_fare(
+            float(ride_req.origin_lat), float(ride_req.origin_lng),
+            float(ride_req.destination_lat), float(ride_req.destination_lng),
+            is_private=False,
+        )
+        private_fare = FareEngine.calculate_fare(
+            float(ride_req.origin_lat), float(ride_req.origin_lng),
+            float(ride_req.destination_lat), float(ride_req.destination_lng),
+            is_private=True,
+        )
+        trip = Trip.objects.create(
+            driver=request.user,
+            vehicle=vehicle,
+            mode=Trip.MODE_SHARED,
+            origin_name=ride_req.origin_name,
+            origin_lat=ride_req.origin_lat,
+            origin_lng=ride_req.origin_lng,
+            destination_name=ride_req.destination_name,
+            destination_lat=ride_req.destination_lat,
+            destination_lng=ride_req.destination_lng,
+            departure_time=timezone.now(),
+            status=Trip.STATUS_ACTIVE,
+            total_seats=vehicle.total_seats,
+            available_seats=vehicle.total_seats,
+            booking_window_open=False,
+            route_fare=route_fare,
+            private_fare=private_fare,
+            minimum_riders=1,
         )
 
     from apps.bookings.models import Booking

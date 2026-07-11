@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.urls import path, reverse
 from django.contrib import messages
 from django.template.response import TemplateResponse
-from .models import User, Vehicle, DriverProfile, RiderProfile, SavedPlace, Strike
+from .models import User, Vehicle, DriverProfile, RiderProfile, SavedPlace, Strike, AppVersion
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -399,6 +399,18 @@ class RiderProfileAdmin(admin.ModelAdmin):
 
 
 admin.site.register(SavedPlace)
+
+
+@admin.register(AppVersion)
+class AppVersionAdmin(admin.ModelAdmin):
+    list_display = ['latest_version', 'min_required_version', 'download_url', 'updated_at']
+    fields = ['latest_version', 'min_required_version', 'download_url', 'release_notes']
+
+    def has_add_permission(self, request):
+        return not AppVersion.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 # ── Custom admin site with dashboard stats ────────────────────────────────────

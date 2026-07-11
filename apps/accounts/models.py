@@ -250,3 +250,34 @@ class SavedPlace(models.Model):
 
     def __str__(self):
         return f'{self.rider.full_name} — {self.name}'
+
+
+# ── App Version (singleton) ───────────────────────────────────────────────────
+
+class AppVersion(models.Model):
+    """Singleton that controls the minimum and latest app version."""
+    latest_version = models.CharField(max_length=20, default='1.0.0')
+    min_required_version = models.CharField(max_length=20, default='1.0.0')
+    download_url = models.URLField(
+        default='https://github.com/lumbilumbi200-byte/twambo/releases/latest'
+    )
+    release_notes = models.TextField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'App Version'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1  # enforce singleton
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, _ = cls.objects.get_or_create(pk=1, defaults={
+            'latest_version': '1.0.0',
+            'min_required_version': '1.0.0',
+        })
+        return obj
+
+    def __str__(self):
+        return f'v{self.latest_version} (min: v{self.min_required_version})'
