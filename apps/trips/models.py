@@ -196,7 +196,17 @@ class Trip(models.Model):
 
     @property
     def current_shared_fare(self):
-        """Per-rider fare: route cost divided by current seat takers."""
+        """Per-rider fare.
+
+        Hike trips: route_fare IS the per-seat price — every city pickup pays the
+        full amount regardless of how many others are in the car.  The driver
+        earns more as occupancy grows.
+
+        City trips: route_fare is the total cost split equally among riders, so
+        the per-seat price falls as more people join.
+        """
+        if self.trip_type == 'hike':
+            return self.route_fare.quantize(Decimal('0.01'))
         taken = max(self.seats_taken, 1)
         return (self.route_fare / taken).quantize(Decimal('0.01'))
 
