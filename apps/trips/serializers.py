@@ -7,12 +7,17 @@ from .models import Trip, RecurringTrip, RideRequest
 
 
 class TripCreateSerializer(serializers.ModelSerializer):
+    route_fare = serializers.DecimalField(
+        max_digits=8, decimal_places=2, required=False, write_only=True,
+    )
+
     class Meta:
         model = Trip
         fields = [
             'origin_name', 'origin_lat', 'origin_lng',
             'destination_name', 'destination_lat', 'destination_lng',
             'departure_time', 'mode', 'trip_type', 'total_seats', 'minimum_riders',
+            'route_fare',
         ]
 
     def validate_departure_time(self, value):
@@ -32,6 +37,8 @@ class TripCreateSerializer(serializers.ModelSerializer):
         except Exception:
             raise serializers.ValidationError('Driver has no registered vehicle.')
 
+        client_route_fare = validated_data.pop('route_fare', None)
+
         preview = FareEngine.fare_preview(
             float(validated_data['origin_lat']),
             float(validated_data['origin_lng']),
@@ -39,6 +46,15 @@ class TripCreateSerializer(serializers.ModelSerializer):
             float(validated_data['destination_lng']),
             vehicle_multiplier=vehicle.price_multiplier,
             trip_type=validated_data.get('trip_type', 'city'),
+        )
+
+        # For hike trips the client sends the agreed market fare from kRouteFares;
+        # use it when provided, fall back to FareEngine for unknown city pairs.
+        is_hike = validated_data.get('trip_type') == Trip.TYPE_HIKE
+        route_fare = (
+            client_route_fare
+            if is_hike and client_route_fare is not None
+            else Decimal(str(preview['shared_fare']))
         )
 
         booking_window_closes_at = (
@@ -49,7 +65,7 @@ class TripCreateSerializer(serializers.ModelSerializer):
         return Trip.objects.create(
             driver=driver,
             vehicle=vehicle,
-            route_fare=Decimal(str(preview['shared_fare'])),
+            route_fare=route_fare,
             private_fare=Decimal(str(preview['private_fare'])),
             available_seats=validated_data['total_seats'],
             booking_window_closes_at=booking_window_closes_at,
