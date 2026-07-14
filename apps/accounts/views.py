@@ -10,7 +10,7 @@ from .serializers import (
 )
 
 
-@api_view(['GET'])
+@api_view(['GET', 'HEAD'])
 @permission_classes([permissions.AllowAny])
 def app_version_check(request):
     v = AppVersion.get_solo()
