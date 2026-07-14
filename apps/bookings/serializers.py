@@ -80,15 +80,17 @@ class BookingListSerializer(serializers.ModelSerializer):
     driver_id = serializers.IntegerField(source='trip.driver.id', read_only=True)
     driver_name = serializers.CharField(source='trip.driver.full_name', read_only=True)
     driver_phone = serializers.CharField(source='trip.driver.phone_number', read_only=True)
+    trip_type = serializers.CharField(source='trip.trip_type', read_only=True)
 
     class Meta:
         model = Booking
         fields = [
             'id', 'trip_id', 'driver_id', 'trip_origin', 'trip_destination', 'trip_departure',
             'driver_name', 'driver_phone',
-            'pickup_name', 'dropoff_name',
+            'pickup_name', 'pickup_lat', 'pickup_lng',
+            'dropoff_name', 'dropoff_lat', 'dropoff_lng',
             'seats_booked', 'fare_at_booking', 'fare_final', 'amount_due',
-            'detour_fee', 'status', 'payment_method', 'created_at',
+            'detour_fee', 'status', 'payment_method', 'trip_type', 'created_at',
         ]
 
 
