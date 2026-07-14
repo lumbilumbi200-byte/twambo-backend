@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Trip, RecurringTrip, RideRequest
+from .models import Trip, RecurringTrip, RideRequest, SeatRelease
 
 
 @admin.register(Trip)
@@ -63,3 +63,12 @@ class RideRequestAdmin(admin.ModelAdmin):
     search_fields = ['rider__full_name', 'rider__phone_number']
     readonly_fields = ['created_at', 'updated_at', 'expires_at']
     raw_id_fields = ['rider', 'accepted_trip']
+
+
+@admin.register(SeatRelease)
+class SeatReleaseAdmin(admin.ModelAdmin):
+    list_display = ['id', 'trip', 'city_name', 'city_id', 'seats', 'status', 'announced_at']
+    list_filter = ['status', 'city_id']
+    search_fields = ['city_name', 'trip__origin_name', 'trip__destination_name']
+    readonly_fields = ['announced_at']
+    raw_id_fields = ['trip']

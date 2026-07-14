@@ -58,3 +58,28 @@ class TripConsumer(AsyncWebsocketConsumer):
 
     async def trip_update(self, event):
         await self.send(text_data=json.dumps(event['data']))
+
+
+class CityConsumer(AsyncWebsocketConsumer):
+    """Riders subscribe to their city's channel to receive seat release announcements."""
+
+    async def connect(self):
+        user = self.scope.get('user')
+        if not user or not user.is_authenticated:
+            await self.close(code=4001)
+            return
+
+        self.city_id = self.scope['url_route']['kwargs']['city_id']
+        self.group_name = f'city_{self.city_id}'
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        if hasattr(self, 'group_name'):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def receive(self, text_data):
+        pass
+
+    async def seat_release(self, event):
+        await self.send(text_data=json.dumps(event['data']))

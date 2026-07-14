@@ -274,3 +274,30 @@ class RideRequest(models.Model):
 
     def __str__(self):
         return f'RideRequest #{self.pk} | {self.rider} [{self.status}] {self.origin_name}→{self.destination_name}'
+
+
+class SeatRelease(models.Model):
+    """Driver pre-announces a drop-off at an intermediate city.
+    Broadcasted via WebSocket to all riders subscribed to that city's channel."""
+    STATUS_ACTIVE = 'active'
+    STATUS_FILLED = 'filled'
+    STATUS_CANCELLED = 'cancelled'
+    STATUS_CHOICES = [
+        (STATUS_ACTIVE, 'Active'),
+        (STATUS_FILLED, 'Filled'),
+        (STATUS_CANCELLED, 'Cancelled'),
+    ]
+
+    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='seat_releases')
+    city_name = models.CharField(max_length=100)
+    city_id = models.CharField(max_length=50, db_index=True)
+    seats = models.PositiveSmallIntegerField(default=1)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default=STATUS_ACTIVE)
+    announced_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'seat_releases'
+        ordering = ['-announced_at']
+
+    def __str__(self):
+        return f"SeatRelease trip={self.trip_id} city={self.city_name} ({self.status})"

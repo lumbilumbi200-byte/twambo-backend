@@ -6,7 +6,7 @@ from django.conf import settings
 from datetime import timedelta
 from decimal import Decimal
 from django.db.models import Q
-from .models import Trip, RecurringTrip, RideRequest
+from .models import Trip, RecurringTrip, RideRequest, SeatRelease
 from rest_framework.exceptions import PermissionDenied
 from .serializers import (
     TripCreateSerializer, TripListSerializer,
@@ -336,17 +336,6 @@ def close_booking_window(request, pk):
 def accept_ride_request(request, pk, request_pk):
     """Driver accepts a RideRequest → creates a confirmed Booking on the trip."""
     try:
-        trip = Trip.objects.get(pk=pk, driver=request.user)
-    except Trip.DoesNotExist:
-        return Response({'detail': 'Trip not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-    if trip.status not in [Trip.STATUS_SCHEDULED, Trip.STATUS_ACTIVE]:
-        return Response({'detail': 'Trip is not accepting riders.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    if trip.available_seats < 1:
-        return Response({'detail': 'No seats available on this trip.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
         ride_req = RideRequest.objects.get(pk=request_pk, status=RideRequest.STATUS_PENDING)
     except RideRequest.DoesNotExist:
         return Response({'detail': 'Request not found or already handled.'}, status=status.HTTP_404_NOT_FOUND)
@@ -354,13 +343,25 @@ def accept_ride_request(request, pk, request_pk):
     from apps.bookings.models import Booking
     from django.db import transaction as dbt
 
-    if Booking.objects.filter(
-        trip=trip, rider=ride_req.rider,
-        status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED],
-    ).exists():
-        return Response({'detail': 'Rider already has a booking on this trip.'}, status=status.HTTP_400_BAD_REQUEST)
-
     with dbt.atomic():
+        # Lock the trip row — prevents two concurrent accepts from both seeing available_seats ≥ 1
+        try:
+            trip = Trip.objects.select_for_update().get(pk=pk, driver=request.user)
+        except Trip.DoesNotExist:
+            return Response({'detail': 'Trip not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if trip.status not in [Trip.STATUS_SCHEDULED, Trip.STATUS_ACTIVE]:
+            return Response({'detail': 'Trip is not accepting riders.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if trip.available_seats < 1:
+            return Response({'detail': 'No seats available on this trip.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if Booking.objects.filter(
+            trip=trip, rider=ride_req.rider,
+            status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED],
+        ).exists():
+            return Response({'detail': 'Rider already has a booking on this trip.'}, status=status.HTTP_400_BAD_REQUEST)
+
         Booking.objects.create(
             trip=trip,
             rider=ride_req.rider,
@@ -381,6 +382,10 @@ def accept_ride_request(request, pk, request_pk):
         ride_req.status = RideRequest.STATUS_ACCEPTED
         ride_req.accepted_trip = trip
         ride_req.save(update_fields=['status', 'accepted_trip', 'updated_at'])
+        # Close the seat release announcement now that a rider has been accepted
+        SeatRelease.objects.filter(trip=trip, status=SeatRelease.STATUS_ACTIVE).update(
+            status=SeatRelease.STATUS_FILLED
+        )
 
     from apps.notifications.tasks import send_push_notification
     send_push_notification.delay(
@@ -439,73 +444,75 @@ class DriverBroadcastInboxView(generics.ListAPIView):
 @permission_classes([IsApprovedDriver])
 def accept_broadcast_request(request, pk):
     """Driver accepts a broadcast RideRequest → attaches rider to driver's latest active/scheduled trip."""
-    try:
-        ride_req = RideRequest.objects.get(
-            pk=pk, status=RideRequest.STATUS_PENDING,
-            accepted_trip__isnull=True, requested_trip__isnull=True,
-        )
-    except RideRequest.DoesNotExist:
-        return Response({'detail': 'Request not found or already handled.'}, status=status.HTTP_404_NOT_FOUND)
-
-    if ride_req.expires_at < timezone.now():
-        return Response({'detail': 'This request has expired.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    trip = Trip.objects.filter(
-        driver=request.user,
-        status__in=[Trip.STATUS_ACTIVE, Trip.STATUS_SCHEDULED],
-        available_seats__gte=1,
-    ).order_by('-created_at').first()
-
-    if trip is None:
-        # Auto-create an on-demand trip from the rider's origin to destination
-        from apps.accounts.models import Vehicle
-        from apps.pricing.engine import FareEngine
-        vehicle = Vehicle.objects.filter(driver=request.user).first()
-        if not vehicle:
-            return Response(
-                {'detail': 'Add your vehicle before accepting rides.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        route_fare = FareEngine.calculate_fare(
-            float(ride_req.origin_lat), float(ride_req.origin_lng),
-            float(ride_req.destination_lat), float(ride_req.destination_lng),
-            is_private=False,
-        )
-        private_fare = FareEngine.calculate_fare(
-            float(ride_req.origin_lat), float(ride_req.origin_lng),
-            float(ride_req.destination_lat), float(ride_req.destination_lng),
-            is_private=True,
-        )
-        trip = Trip.objects.create(
-            driver=request.user,
-            vehicle=vehicle,
-            mode=Trip.MODE_SHARED,
-            origin_name=ride_req.origin_name,
-            origin_lat=ride_req.origin_lat,
-            origin_lng=ride_req.origin_lng,
-            destination_name=ride_req.destination_name,
-            destination_lat=ride_req.destination_lat,
-            destination_lng=ride_req.destination_lng,
-            departure_time=timezone.now(),
-            status=Trip.STATUS_ACTIVE,
-            total_seats=vehicle.total_seats,
-            available_seats=vehicle.total_seats,
-            booking_window_open=False,
-            route_fare=route_fare,
-            private_fare=private_fare,
-            minimum_riders=1,
-        )
-
     from apps.bookings.models import Booking
     from django.db import transaction as dbt
 
-    if Booking.objects.filter(
-        trip=trip, rider=ride_req.rider,
-        status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED],
-    ).exists():
-        return Response({'detail': 'Rider already has a booking on your trip.'}, status=status.HTTP_400_BAD_REQUEST)
-
     with dbt.atomic():
+        # Lock ride_req row — prevents two drivers from simultaneously accepting the same broadcast
+        try:
+            ride_req = RideRequest.objects.select_for_update().get(
+                pk=pk, status=RideRequest.STATUS_PENDING,
+                accepted_trip__isnull=True, requested_trip__isnull=True,
+            )
+        except RideRequest.DoesNotExist:
+            return Response({'detail': 'Request not found or already handled.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if ride_req.expires_at < timezone.now():
+            return Response({'detail': 'This request has expired.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Lock the trip row to prevent seat overbooking under concurrent accepts
+        trip = Trip.objects.select_for_update().filter(
+            driver=request.user,
+            status__in=[Trip.STATUS_ACTIVE, Trip.STATUS_SCHEDULED],
+            available_seats__gte=1,
+        ).order_by('-created_at').first()
+
+        if trip is None:
+            # Auto-create an on-demand trip from the rider's origin to destination
+            from apps.accounts.models import Vehicle
+            from apps.pricing.engine import FareEngine
+            vehicle = Vehicle.objects.filter(driver=request.user).first()
+            if not vehicle:
+                return Response(
+                    {'detail': 'Add your vehicle before accepting rides.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            route_fare = FareEngine.calculate_fare(
+                float(ride_req.origin_lat), float(ride_req.origin_lng),
+                float(ride_req.destination_lat), float(ride_req.destination_lng),
+                is_private=False,
+            )
+            private_fare = FareEngine.calculate_fare(
+                float(ride_req.origin_lat), float(ride_req.origin_lng),
+                float(ride_req.destination_lat), float(ride_req.destination_lng),
+                is_private=True,
+            )
+            trip = Trip.objects.create(
+                driver=request.user,
+                vehicle=vehicle,
+                mode=Trip.MODE_SHARED,
+                origin_name=ride_req.origin_name,
+                origin_lat=ride_req.origin_lat,
+                origin_lng=ride_req.origin_lng,
+                destination_name=ride_req.destination_name,
+                destination_lat=ride_req.destination_lat,
+                destination_lng=ride_req.destination_lng,
+                departure_time=timezone.now(),
+                status=Trip.STATUS_ACTIVE,
+                total_seats=vehicle.total_seats,
+                available_seats=vehicle.total_seats,
+                booking_window_open=False,
+                route_fare=route_fare,
+                private_fare=private_fare,
+                minimum_riders=1,
+            )
+
+        if Booking.objects.filter(
+            trip=trip, rider=ride_req.rider,
+            status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED],
+        ).exists():
+            return Response({'detail': 'Rider already has a booking on your trip.'}, status=status.HTTP_400_BAD_REQUEST)
+
         Booking.objects.create(
             trip=trip,
             rider=ride_req.rider,
@@ -644,3 +651,64 @@ def cancel_ride_request(request, pk):
     ride_req.status = RideRequest.STATUS_CANCELLED
     ride_req.save(update_fields=['status', 'updated_at'])
     return Response({'status': 'cancelled'})
+
+
+# ── Driver: seat release announcement ────────────────────────────────────────
+
+@api_view(['POST'])
+@permission_classes([IsApprovedDriver])
+def announce_dropoff(request, pk):
+    """Driver pre-announces a drop-off at an intermediate city on a hike trip.
+    Broadcasts a seat_release event to all riders subscribed to that city's WS group.
+    Riders can then send a join request; driver picks who to accept."""
+    try:
+        trip = Trip.objects.get(
+            pk=pk, driver=request.user,
+            status__in=[Trip.STATUS_ACTIVE, Trip.STATUS_SCHEDULED],
+        )
+    except Trip.DoesNotExist:
+        return Response({'detail': 'Trip not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    city_name = request.data.get('city_name', '').strip()
+    city_id = request.data.get('city_id', '').strip()
+    seats = max(1, int(request.data.get('seats', 1)))
+
+    if not city_name or not city_id:
+        return Response(
+            {'detail': 'city_name and city_id are required.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Cancel any existing active announcement so there's always at most one per trip
+    SeatRelease.objects.filter(trip=trip, status=SeatRelease.STATUS_ACTIVE).update(
+        status=SeatRelease.STATUS_CANCELLED
+    )
+    release = SeatRelease.objects.create(
+        trip=trip, city_name=city_name, city_id=city_id, seats=seats,
+    )
+
+    try:
+        from asgiref.sync import async_to_sync
+        from channels.layers import get_channel_layer
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'city_{city_id}',
+            {
+                'type': 'seat_release',
+                'data': {
+                    'type': 'seat_release',
+                    'release_id': release.id,
+                    'trip_id': trip.id,
+                    'origin': trip.origin_name,
+                    'destination': trip.destination_name,
+                    'city_name': city_name,
+                    'seats': seats,
+                    'driver_name': trip.driver.full_name,
+                    'fare': str(trip.current_shared_fare),
+                },
+            },
+        )
+    except Exception:
+        pass  # WS broadcast is best-effort; the SeatRelease record is already saved
+
+    return Response({'release_id': release.id, 'status': 'announced'}, status=status.HTTP_201_CREATED)

@@ -13,6 +13,7 @@ urlpatterns = [
     path('driver/<int:pk>/cancel/', views.trip_cancel, name='trip-cancel'),
     path('driver/<int:pk>/requests/', views.DriverTripRideRequestsView.as_view(), name='driver-trip-requests'),
     path('driver/<int:pk>/close-window/', views.close_booking_window, name='trip-close-window'),
+    path('driver/<int:pk>/announce-dropoff/', views.announce_dropoff, name='trip-announce-dropoff'),
     path('driver/<int:pk>/requests/<int:request_pk>/accept/', views.accept_ride_request, name='ride-request-accept'),
     path('driver/<int:pk>/requests/<int:request_pk>/reject/', views.reject_ride_request, name='ride-request-reject'),
 
