@@ -9,6 +9,7 @@ class BookingAdmin(admin.ModelAdmin):
         'id', 'rider_link', 'trip_route', 'status_badge',
         'seats_booked', 'fare_display', 'payment_method', 'created_at',
     ]
+    list_per_page = 20
     list_filter = ['status', 'payment_method']
     search_fields = ['rider__full_name', 'rider__phone_number']
     readonly_fields = ['created_at', 'updated_at', 'cancelled_at']

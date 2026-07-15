@@ -9,6 +9,7 @@ class TripAdmin(admin.ModelAdmin):
         'id', 'driver_link', 'route_display', 'departure_time',
         'status_badge', 'mode', 'seats_display', 'created_at',
     ]
+    list_per_page = 20
     list_filter = ['status', 'mode', 'booking_window_open']
     search_fields = ['driver__full_name', 'driver__phone_number', 'origin_name', 'destination_name']
     readonly_fields = ['started_at', 'completed_at', 'created_at', 'updated_at', 'seats_taken']

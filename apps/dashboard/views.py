@@ -102,7 +102,7 @@ def riders(request):
     elif status == 'clean':
         qs = qs.filter(strike_count=0, is_banned=False)
 
-    paginator = Paginator(qs, 25)
+    paginator = Paginator(qs, 20)
     page_obj = paginator.get_page(request.GET.get('page'))
 
     return render(request, 'dashboard/riders.html', {
@@ -134,7 +134,7 @@ def drivers(request):
     elif status == 'strikes':
         qs = qs.filter(strike_count__gt=0)
 
-    paginator = Paginator(qs, 25)
+    paginator = Paginator(qs, 20)
     page_obj = paginator.get_page(request.GET.get('page'))
 
     return render(request, 'dashboard/drivers.html', {
@@ -348,7 +348,7 @@ def trips(request):
             Q(destination_name__icontains=q)
         )
 
-    paginator = Paginator(qs, 25)
+    paginator = Paginator(qs, 20)
     page_obj = paginator.get_page(request.GET.get('page'))
 
     # Map data — first 300 filtered trips with coordinates for the Leaflet overlay

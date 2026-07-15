@@ -18,15 +18,7 @@
   .badge-hike { background:#fff8e1; color:#E65100; font-size:10px; font-weight:700;
                 padding:2px 7px; border-radius:2px; letter-spacing:.5px; }
 
-  /* Map panel */
-  #map-panel { border-top:2px solid var(--tw-line); margin-top:20px; }
-  #map-toggle { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
-                cursor:pointer; background:none; border:none; color:var(--tw-blue);
-                padding:10px 0; display:flex; align-items:center; gap:6px; }
-  #map-toggle svg { transition:transform .2s; }
-  #map-toggle.open svg { transform:rotate(180deg); }
-  #trip-map { height:420px; width:100%; display:none; }
-  #trip-map.visible { display:block; }
+  #trip-map { height:340px; width:100%; margin-bottom:20px; }
 </style>
 
 <!-- ── Type Tabs ── -->
@@ -44,6 +36,13 @@
     Hike / Long Distance
   </a>
 </div>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- ── Map (always visible, above table) ── -->
+<div id="trip-map"></div>
 
 <!-- ── Filter Bar ── -->
 <div class="filter-bar mb-4">
@@ -121,43 +120,34 @@
   <ul class="pagination pagination-sm">
     {% if page_obj.has_previous %}
     <li class="page-item">
-      <a class="page-link"
-         href="?page={{ page_obj.previous_page_number }}&q={{ q }}&status={{ status_filter }}&trip_type={{ trip_type }}"
-         style="border-radius:0;">‹</a>
+      <a class="page-link" style="border-radius:0;"
+         href="?page={{ page_obj.previous_page_number }}&q={{ q }}&status={{ status_filter }}&trip_type={{ trip_type }}">‹</a>
     </li>
     {% endif %}
-    <li class="page-item disabled">
-      <span class="page-link" style="border-radius:0;">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-    </li>
+    {% for p in page_obj.paginator.page_range %}
+      {% if p >= page_obj.number|add:"-3" and p <= page_obj.number|add:"3" %}
+      <li class="page-item {% if p == page_obj.number %}active{% endif %}">
+        {% if p == page_obj.number %}
+          <span class="page-link" style="border-radius:0;background:var(--tw-blue);color:#fff;border-color:var(--tw-blue);">{{ p }}</span>
+        {% else %}
+          <a class="page-link" style="border-radius:0;"
+             href="?page={{ p }}&q={{ q }}&status={{ status_filter }}&trip_type={{ trip_type }}">{{ p }}</a>
+        {% endif %}
+      </li>
+      {% endif %}
+    {% endfor %}
     {% if page_obj.has_next %}
     <li class="page-item">
-      <a class="page-link"
-         href="?page={{ page_obj.next_page_number }}&q={{ q }}&status={{ status_filter }}&trip_type={{ trip_type }}"
-         style="border-radius:0;">›</a>
+      <a class="page-link" style="border-radius:0;"
+         href="?page={{ page_obj.next_page_number }}&q={{ q }}&status={{ status_filter }}&trip_type={{ trip_type }}">›</a>
     </li>
     {% endif %}
   </ul>
 </nav>
 {% endif %}
 
-<!-- ── Map Panel ── -->
-<div id="map-panel">
-  <button id="map-toggle" onclick="toggleMap()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <polyline points="6 9 12 15 18 9"></polyline>
-    </svg>
-    Show Map
-  </button>
-  <div id="trip-map"></div>
-</div>
-
-<!-- Leaflet (CDN — requires internet; self-host if deploying offline) -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
   const TRIPS = {{ map_trips_json|safe }};
-  let map = null;
 
   const STATUS_COLOR = {
     active:    '#1565C0',
@@ -170,50 +160,31 @@
     hike: '#E65100',
   };
 
-  function buildMap() {
-    if (map) return;
-    // Centre on Zambia
-    map = L.map('trip-map').setView([-13.5, 28.5], 6);
+  document.addEventListener('DOMContentLoaded', function () {
+    const map = L.map('trip-map').setView([-13.5, 28.5], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 18,
     }).addTo(map);
 
     TRIPS.forEach(t => {
-      const col = STATUS_COLOR[t.status] || '#888';
+      const col  = STATUS_COLOR[t.status] || '#888';
       const oCol = TYPE_ORIGIN_COLOR[t.type] || '#1565C0';
 
-      // Origin marker
       L.circleMarker([t.oLat, t.oLng], {
         radius: 5, color: oCol, fillColor: oCol, fillOpacity: 1, weight: 1,
       }).bindTooltip(`<b>${t.o}</b><br>→ ${t.d}<br>${t.type.toUpperCase()} · ${t.status}`,
                      {direction:'top', sticky:true}).addTo(map);
 
-      // Destination marker
       L.circleMarker([t.dLat, t.dLng], {
         radius: 4, color: col, fillColor: '#fff', fillOpacity: 1, weight: 2,
       }).addTo(map);
 
-      // Route line
       L.polyline([[t.oLat, t.oLng], [t.dLat, t.dLng]], {
         color: col, weight: 1.5, opacity: 0.55, dashArray: t.type === 'hike' ? '6,4' : null,
       }).addTo(map);
     });
-  }
-
-  function toggleMap() {
-    const mapEl = document.getElementById('trip-map');
-    const btn   = document.getElementById('map-toggle');
-    const visible = mapEl.classList.toggle('visible');
-    btn.classList.toggle('open', visible);
-    btn.querySelector('span') && (btn.childNodes[1].textContent = visible ? ' Hide Map' : ' Show Map');
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <polyline points="6 9 12 15 18 9"></polyline></svg> ${visible ? 'Hide Map' : 'Show Map'}`;
-    if (visible) {
-      buildMap();
-      setTimeout(() => map && map.invalidateSize(), 50);
-    }
-  }
+  });
 </script>
 
 {% endblock %}

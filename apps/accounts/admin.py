@@ -72,6 +72,7 @@ class UserAdmin(BaseUserAdmin):
         'strike_visual', 'is_banned', 'is_active',
         'rating_display', 'joined', 'quick_actions',
     ]
+    list_per_page = 20
     list_filter = ['role', 'is_banned', 'is_active']
     search_fields = ['phone_number', 'full_name']
     ordering = ['-created_at']
@@ -258,6 +259,7 @@ class DriverProfileAdmin(admin.ModelAdmin):
         'driver_name', 'phone_number', 'verification_status',
         'is_online', 'rating', 'total_trips', 'created_at', 'approval_actions',
     ]
+    list_per_page = 20
     list_filter = ['verification_status', 'is_online']
     search_fields = ['user__phone_number', 'user__full_name']
     readonly_fields = [
