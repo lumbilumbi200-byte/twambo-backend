@@ -275,7 +275,7 @@ class RideRequestListCreateView(generics.ListCreateAPIView):
         return RideRequest.objects.filter(
             rider=self.request.user,
             status__in=[RideRequest.STATUS_PENDING, RideRequest.STATUS_ACCEPTED],
-        ).order_by('-created_at')
+        ).select_related('accepted_trip__driver').order_by('-created_at')
 
 
 class DriverTripRideRequestsView(generics.ListAPIView):
@@ -501,7 +501,7 @@ def accept_broadcast_request(request, pk):
                 status=Trip.STATUS_ACTIVE,
                 total_seats=vehicle.total_seats,
                 available_seats=vehicle.total_seats,
-                booking_window_open=False,
+                booking_window_open=True,
                 route_fare=route_fare,
                 private_fare=private_fare,
                 minimum_riders=1,

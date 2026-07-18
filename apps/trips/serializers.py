@@ -176,9 +176,19 @@ class RideRequestListSerializer(serializers.ModelSerializer):
         return obj.accepted_trip_id if obj.accepted_trip_id else -1
 
     def get_driver_id(self, obj):
+        if obj.accepted_trip_id:
+            try:
+                return obj.accepted_trip.driver_id
+            except Exception:
+                pass
         return 0
 
     def get_driver_name(self, obj):
+        if obj.accepted_trip_id:
+            try:
+                return obj.accepted_trip.driver.full_name
+            except Exception:
+                pass
         if obj.mode == Trip.MODE_DYNAMIC:
             return 'Finding riders…'
         return 'Searching driver…'
