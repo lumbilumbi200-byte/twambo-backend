@@ -49,7 +49,7 @@ def _finalize_trip(trip):
         except Exception:
             pass
         # Notify rider
-        send_push_notification.delay(
+        send_push_notification(
             booking.rider_id,
             'Trip Completed',
             f'Your ride to {trip.destination_name} is complete. Amount due: K{booking.fare_final}',
@@ -78,7 +78,7 @@ def _finalize_trip(trip):
                     profile.is_online = False
                     profile.save(update_fields=['is_online'])
                     from apps.notifications.tasks import send_push_notification
-                    send_push_notification.delay(
+                    send_push_notification(
                         trip.driver_id,
                         'Float Too Low',
                         f'Your float (K{wallet.balance}) is below K{wallet.minimum_float}. Top up to go online again.',
@@ -145,7 +145,7 @@ def trip_start(request, pk):
         )
     trip.start()
     from apps.notifications.tasks import send_push_to_trip_riders
-    send_push_to_trip_riders.delay(
+    send_push_to_trip_riders(
         trip.id,
         'Your driver is on the way!',
         f'{trip.driver.full_name} has started the trip to {trip.destination_name}.',
@@ -388,7 +388,7 @@ def accept_ride_request(request, pk, request_pk):
         )
 
     from apps.notifications.tasks import send_push_notification
-    send_push_notification.delay(
+    send_push_notification(
         ride_req.rider_id,
         'Request Accepted!',
         f'{trip.driver.full_name} accepted your ride to {trip.destination_name}.',
@@ -415,7 +415,7 @@ def reject_ride_request(request, pk, request_pk):
     ride_req.save(update_fields=['status', 'updated_at'])
 
     from apps.notifications.tasks import send_push_notification
-    send_push_notification.delay(
+    send_push_notification(
         ride_req.rider_id,
         'Request Declined',
         f'Your ride request to {ride_req.destination_name} was not accepted.',
@@ -535,7 +535,7 @@ def accept_broadcast_request(request, pk):
         ride_req.save(update_fields=['status', 'accepted_trip', 'updated_at'])
 
     from apps.notifications.tasks import send_push_notification
-    send_push_notification.delay(
+    send_push_notification(
         ride_req.rider_id,
         'Request Accepted!',
         f'{trip.driver.full_name} accepted your ride to {trip.destination_name}.',
@@ -549,7 +549,7 @@ def accept_broadcast_request(request, pk):
             .values_list('rider_id', flat=True)
         )
         for rider_id in existing_rider_ids:
-            send_push_notification.delay(
+            send_push_notification(
                 rider_id,
                 'New Pickup Added',
                 f'Your driver is picking up another passenger near {ride_req.origin_name}.',
@@ -571,7 +571,7 @@ def decline_broadcast_request(request, pk):
     ride_req.save(update_fields=['status', 'updated_at'])
 
     from apps.notifications.tasks import send_push_notification
-    send_push_notification.delay(
+    send_push_notification(
         ride_req.rider_id,
         'Request Declined',
         f'Your ride request to {ride_req.destination_name} was not accepted.',
@@ -627,7 +627,7 @@ def request_join_trip(request, pk):
     )
 
     # Notify driver
-    send_push_notification.delay(
+    send_push_notification(
         trip.driver_id,
         'New Join Request!',
         f'{request.user.full_name} wants to join your active trip.',

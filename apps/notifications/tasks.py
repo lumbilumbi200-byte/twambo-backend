@@ -32,6 +32,6 @@ def send_push_to_trip_riders(trip_id, title, body, data=None):
     ).select_related('rider')
 
     for booking in bookings:
-        send_push_notification.delay(
+        send_push_notification(
             booking.rider_id, title, body, data or {}
         )

@@ -111,7 +111,7 @@ def driver_mark_picked_up(request, pk):
 
     from apps.notifications.tasks import send_push_notification
     # Notify the picked-up rider
-    send_push_notification.delay(
+    send_push_notification(
         booking.rider_id,
         'You\'ve been picked up!',
         f'Welcome aboard — enjoy your ride to {booking.dropoff_name}.',
@@ -122,7 +122,7 @@ def driver_mark_picked_up(request, pk):
         trip=booking.trip, status=Booking.STATUS_CONFIRMED
     ).exclude(pk=pk).values_list('rider_id', flat=True)
     for rider_id in others:
-        send_push_notification.delay(
+        send_push_notification(
             rider_id,
             'Passenger picked up',
             f'{booking.rider.full_name.split()[0]} has been picked up — you\'re getting closer!',
